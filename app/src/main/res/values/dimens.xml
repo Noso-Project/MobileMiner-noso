@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="main_noso_logo">45dp</dimen>
+    <dimen name="main_noso_title_text_size">20sp</dimen>
+    <dimen name="main_noso_subtitle_text_size">12sp</dimen>
+    <dimen name="main_noso_subtitle_top_margin">-5dp</dimen>
+    <dimen name="main_settings_button">45dp</dimen>
+    <dimen name="general_normal_padding">10dp</dimen>
+    <dimen name="general_normal_margin">10dp</dimen>
+    <dimen name="general_big_padding">15dp</dimen>
+    <dimen name="general_grand_padding">20dp</dimen>
+    <dimen name="general_grand_margin">20dp</dimen>
+    <dimen name="general_normal_text">15sp</dimen>
+    <dimen name="general_small_margin">5dp</dimen>
+    <dimen name="general_normal_width_button">120dp</dimen>
+    <dimen name="general_small_padding">5dp</dimen>
+    <dimen name="general_small_text">12sp</dimen>
+
+    <dimen name="home_speedmeter_size">300dp</dimen>
+    <dimen name="minning_button_size">100dp</dimen>
+    <dimen name="general_title_text">18sp</dimen>
+    <dimen name="general_grand_text">25sp</dimen>
+</resources>

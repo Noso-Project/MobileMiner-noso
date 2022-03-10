@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_corner_rounded_white"
+    android:padding="@dimen/general_small_padding"
+    android:layout_margin="@dimen/general_small_margin"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+    <ImageView
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:src="@drawable/ic_cpuicon"/>
+    <TextView
+        android:id="@+id/autotest_row_cpus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:layout_marginLeft="@dimen/general_small_margin"
+        android:textSize="@dimen/general_small_text"
+        android:textColor="@color/colorChatBlack"
+        android:text="1"/>
+    <TextView
+        android:id="@+id/autotest_row_speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/general_small_margin"
+        android:textColor="@color/colorChatBlack"
+        android:textSize="@dimen/general_small_text"
+        android:text="1320 H/s"/>
+</LinearLayout>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Fragments.LogsFragment">
+    <LinearLayout
+        android:id="@+id/logs_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/general_normal_margin"
+        android:background="@drawable/background_corner_rounded_white">
+        <ScrollView
+            android:id="@+id/logs_fragment_scrollview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/general_normal_padding"
+            android:background="@color/colorBlack">
+            <TextView
+                android:id="@+id/logs_fragment_output"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/general_small_text"
+                android:textColor="@color/colorWhite"/>
+        </ScrollView>
+    </LinearLayout>
+</FrameLayout>

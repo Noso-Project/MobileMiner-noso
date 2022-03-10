@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">MobileMiner</string>
+    <string name="bottom_menu_home">Home</string>
+    <string name="bottom_menu_settings">Settings</string>
+    <string name="bottom_menu_logs">Logs</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="miner_status_syncing">Currently Syncing...</string>
+    <string name="miner_status_waiting_new">Waiting Next Block...</string>
+    <string name="miner_status_mining">Currently Mining....</string>
+    <string name="miner_status_sync_done">Sync Completed...</string>
+
+    <string name="import_wallet_from_qr_prompt">Place the camera in front of the Address QR code</string>
+    <string name="settings_pool">Pool</string>
+    <string name="settings_solo">Solo</string>
+    <string name="invalid_address">You entered an invalid noso address for funds</string>
+    <string name="settings_saved_prompt">Settings were updated</string>
+</resources>
