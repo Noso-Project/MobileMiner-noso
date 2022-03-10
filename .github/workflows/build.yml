@@ -16,8 +16,8 @@ jobs:
     strategy:
       matrix:
         binary: [
-          miner_arm64,
-          miner_arm
+          miner-linux-arm64,
+          miner-linux-arm
         ]
     steps:
       - name: Checkout master
