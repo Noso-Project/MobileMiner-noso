@@ -27,7 +27,8 @@ jobs:
           go env -w GOARCH=arm
 
       - name: Build Arm Binary
-        run: go build ./consominer-go/
+        working-directory: ./consominer-go
+        run: go build .
 
 
   build:
