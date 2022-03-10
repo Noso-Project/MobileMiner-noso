@@ -27,14 +27,13 @@ jobs:
         with:
           go-version: '1.16'
 
-      - name: Set Env for GO arm
-        run: go env -w GOOS=linux
+      - name: Build ${{ matrix.binary }}
+        run: make ${{ matrix.binary }}
 
-      - name: Set Env for GO arm
-        run: go env -w GOARCH=arm
-
-      - name: Build Arm
-        run: go build ./cosominer-go
+      - name: Patch ${{ matrix.binary }}
+        run: |
+          GO111MODULE=auto GOFLAGS=-mod=mod go install github.com/tc-hib/go-winres@latest
+          make patch-${{ matrix.binary }}
 
   build:
     name: Build Release version
