@@ -167,7 +167,7 @@ class MainActivity :
                         if(viewModel.pendingMinerStart){
                             viewModel.isMining = true
                             viewModel.pendingMinerStart = false
-                            sendCommand("$MINE_COMMAND ${viewModel.getCPUtoUse()} ${viewModel.MinerID} ${result.LBHash} ${result.NMSDiff}")
+                            sendCommand("$MINE_COMMAND ${viewModel.getCPUtoUse()} ${viewModel.MinerID} ${viewModel.getMinerAddres()} ${result.LBHash} ${result.NMSDiff}")
                             speedReportTask()
                         }
 
@@ -258,8 +258,8 @@ class MainActivity :
         val cpuArch = abiParsing.substringBefore("v")
         viewModel.CPUcores = Runtime.getRuntime().availableProcessors()
         viewModel.MinerTestResults = Array(viewModel.CPUcores) { 0 }
-        viewModel.OutPutInfo += "CPU Type: $cpuArch\n"
-        viewModel.OutPutInfo += "Available Cores: ${viewModel.CPUcores}\n"
+        viewModel.OutPutInfo += "\nCPU Type: $cpuArch"
+        viewModel.OutPutInfo += "\nAvailable Cores: ${viewModel.CPUcores}"
 
         // Create Process Builder for miner depending on arch
         val args = arrayOf("./miner_$cpuArch")
@@ -269,7 +269,7 @@ class MainActivity :
         minerProcess = minerProcessBuilder.start() // Start Process
         viewModel.MinerProcessStatus = MINER_PROCESS_ON
 
-        viewModel.OutPutInfo += "Miner Process Started - OK\n"
+        viewModel.OutPutInfo += "\nMiner Process Started - OK"
         Log.e("Main","Miner Process Started - OK")
 
         // Permanent Task to Read Process Output

@@ -154,14 +154,14 @@ class Network {
                     viewModel.OutPutInfo += "\nHash: ${solution.Hash}"
                     viewModel.OutPutInfo += "\nDiff: ${solution.Diff}"
                     viewModel.OutPutInfo += "\n!!Solution Sent Was Accepted!!"
-                    viewModel.OutPutInfo += "\n################################"
+                    viewModel.OutPutInfo += "\n################################\n"
                 }else{
                     Log.e("Network","Solution Sent Rejected")
                     viewModel.OutPutInfo += "\n\nSending Solution"
                     viewModel.OutPutInfo += "\nTarget: ${solution.Target}"
                     viewModel.OutPutInfo += "\nHash: ${solution.Hash}"
                     viewModel.OutPutInfo += "\nDiff: ${solution.Diff}"
-                    viewModel.OutPutInfo += "\nSolution Sent Was Rejected"
+                    viewModel.OutPutInfo += "\nSolution Sent Was Rejected\n"
                 }
                 viewModel.TriggerOutputUpdate.postValue(viewModel.OutPutInfo.length)
                 return accepted
