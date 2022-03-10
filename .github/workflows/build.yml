@@ -13,12 +13,6 @@ jobs:
   buildcore:
     name: Build Go Miner Binary
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        binary: [
-          miner-linux-arm64,
-          miner-linux-arm
-        ]
     steps:
       - name: Checkout master
         uses: actions/checkout@master
@@ -27,13 +21,14 @@ jobs:
         with:
           go-version: '1.16'
 
-      - name: Build ${{ matrix.binary }}
-        run: make ${{ matrix.binary }}
+      - name: SetupEnvironment for Arm
+        run: | 
+          go env -w GOOS=linux
+          go env -w GOARCH=arm
 
-      - name: Patch ${{ matrix.binary }}
-        run: |
-          GO111MODULE=auto GOFLAGS=-mod=mod go install github.com/tc-hib/go-winres@latest
-          make patch-${{ matrix.binary }}
+      - name: Build Arm Binary
+        run: go build ./consominer-go/
+
 
   build:
     name: Build Release version
