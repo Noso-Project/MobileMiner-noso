@@ -34,7 +34,7 @@ jobs:
         run: go env -w GOARCH=arm
 
       - name: Build Arm
-        run: go build .        
+        run: go build ./cosominer-go
 
   build:
     name: Build Release version
