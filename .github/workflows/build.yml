@@ -10,8 +10,27 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  buildcore:
+    name: Build Go Miner Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        binary: [
+          miner_arm64,
+          miner_arm
+        ]
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@master
 
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.16'
+
+      - name: Build ${{ matrix.binary }}
+        run: make ${{ matrix.binary }}
+
+  build:
     name: Build Release version
     runs-on: ubuntu-latest
 
@@ -39,7 +58,7 @@ jobs:
     - name: Upload the Release binary
       uses: actions/upload-artifact@v2
       with:
-        name: NosoMobile-Release
+        name: MobileMiner-Release
         path: app/build/outputs/apk/debug/app-debug.apk
 
   package-release:
