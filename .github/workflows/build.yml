@@ -27,8 +27,14 @@ jobs:
         with:
           go-version: '1.16'
 
-      - name: Build ${{ matrix.binary }}
-        run: make ${{ matrix.binary }}
+      - name: Set Env for GO arm
+        run: go env -w GOOS=linux
+
+      - name: Set Env for GO arm
+        run: go env -w GOARCH=arm
+
+      - name: Build Arm
+        run: go build .        
 
   build:
     name: Build Release version
