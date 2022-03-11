@@ -27,14 +27,25 @@ jobs:
           go env -w GOOS=linux
           go env -w GOARCH=arm
           go mod download
-          go build -o '/home/runner/work/MobileMiner-noso/app/src/main/assets/miner/miner_arm' .
+          go build -o '/home/runner/work/MobileMiner-noso/miner/miner_arm' .
 
       - name: Build Arm64 Binary
         working-directory: ./consominer-go
         run: |
           go env -w GOARCH=arm64
-          go build -o '/home/runner/work/MobileMiner-noso/app/src/main/assets/miner/miner_arm64' .
+          go build -o '/home/runner/work/MobileMiner-noso/miner/miner_arm64' .
 
+      - name: Save the binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: Miner-binary-arm
+          path: home/runner/work/MobileMiner-noso/miner/miner_arm
+
+      - name: Save the binaries2
+        uses: actions/upload-artifact@v3
+        with:
+          name: Miner-binary-arm2
+          path: miner_arm
 
   build:
     name: Build Release version
