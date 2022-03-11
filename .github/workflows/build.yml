@@ -36,10 +36,9 @@ jobs:
           go build -o 'miner_arm' .
 
       - name: Save the binaries
-        uses: actions/upload-artifact@v2
-        with:
-          name: miner_arm
-          path: ./miner_arm
+        run: |
+          ls
+          pwd
 
   build:
     name: Build Release version
