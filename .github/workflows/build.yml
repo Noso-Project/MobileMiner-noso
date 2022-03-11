@@ -28,12 +28,14 @@ jobs:
           go env -w GOARCH=arm
           go mod download
           go build -o output/miner_arm .
+          ls
 
       - name: Build Arm64 Binary
         working-directory: ./consominer-go
         run: |
           go env -w GOARCH=arm64
           go build -o output/miner_arm64 .
+          ls
 
       - name: Save the binaries
         uses: actions/upload-artifact@v3
