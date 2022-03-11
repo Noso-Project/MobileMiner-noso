@@ -1,4 +1,2 @@
-## Version 1.0
-- First release of the MobileMiner, android miner for Android 6+ devices
-- Core developed in GO used for the NosoHash algo
-- Basic Miner Functionalities
+## Version 1.0.1
+- Fixed issue during artifact download, it was placed in the wrong path
