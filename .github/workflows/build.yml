@@ -22,6 +22,7 @@ jobs:
           go-version: '1.17'
 
       - name: Prepare Environment
+        working-directory: ./consominer-go
         run: |
           go env -w GOOS=linux
           go mod download
