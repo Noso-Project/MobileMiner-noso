@@ -21,35 +21,34 @@ jobs:
         with:
           go-version: '1.17'
 
-      - name: Where am I
+      - name: Prepare Environment
         run: |
-          ls
-          pwd
+          go env -w GOOS=linux
+          go mod download
 
       - name: Build Arm Binary
         working-directory: ./consominer-go
-        run: | 
-          go env -w GOOS=linux
+        run: |
           go env -w GOARCH=arm
-          go mod download
           go build -o output/miner_arm .
-          ls output/
 
       - name: Build Arm64 Binary
         working-directory: ./consominer-go
         run: |
           go env -w GOARCH=arm64
           go build -o output/miner_arm64 .
-          ls output/
 
-      - name: Save the binaries
+      - name: Save the Arm-Binary
         uses: actions/upload-artifact@v3
         with:
-          name: Miner-binary-arm
-          path: output/miner_arm
+          name: Miner-Arm
+          path: consominer-go/output/miner_arm
 
-      - name: Save the binaries2
-        run: ls output/
+      - name: Save the Arm64-Binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: Miner-Arm64
+          path: consominer-go/output/miner_arm64
 
   build:
     name: Build Release version
