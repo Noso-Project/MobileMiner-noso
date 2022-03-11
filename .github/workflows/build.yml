@@ -114,20 +114,20 @@ jobs:
       uses: actions/download-artifact@v2
       
     - name: List files
-      run: ls -alF NosoMobile-Release
+      run: ls -alF MobileMiner-Release
 
     - name: Create release files
       run: |
-        cd NosoMobile-Release
-        mv app-debug.apk NosoMobile-${{ steps.vars.outputs.tag }}.apk
-        zip -r NosoMobile-${{ steps.vars.outputs.tag }}.zip NosoMobile-${{ steps.vars.outputs.tag }}.apk
+        cd MobileMiner-Release
+        mv app-debug.apk MobileMiner-${{ steps.vars.outputs.tag }}.apk
+        zip -r MobileMiner-${{ steps.vars.outputs.tag }}.zip MobileMiner-${{ steps.vars.outputs.tag }}.apk
     - name: Create GitHub release
       uses: softprops/action-gh-release@v1
       with:
-        name: NosoMobile ${{ steps.vars.outputs.tag }}
+        name: MobileMiner ${{ steps.vars.outputs.tag }}
         body_path: release-notes.md
         files: |
-          NosoMobile-Release/*.apk
-          NosoMobile-Release/*.zip
+          MobileMiner-Release/*.apk
+          MobileMiner-Release/*.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
