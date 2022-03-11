@@ -30,6 +30,7 @@ jobs:
           go build -o 'miner_arm' .
 
       - name: Build Arm64 Binary
+        working-directory: ./consominer-go
         run: |
           go env -w GOARCH=arm64
           go build -o 'miner_arm' .
