@@ -1,18 +1,12 @@
-#include <set>
-#include <mutex>
-#include <tuple>
 #include <array>
 #include <vector>
 #include <string>
 #include <thread>
-#include <random>
 #include <chrono>
 #include <numeric>
-#include <iomanip>
 #include <cassert>
 #include <iostream>
 
-#include <signal.h>
 #include <unistd.h>
 
 #include "md5-c.hpp"
@@ -40,6 +34,7 @@ const std::string MINER_STOP = "MINER_STOP";
 
 const std::string EXIT_COMMAND = "EXIT";
 const std::string MINE_COMMAND = "MINE";
+const std::string MINE_POOL_COMMAND = "MINEPOOL";
 const std::string UPDATE_BLOCK = "CHANGEBLOCK";
 const std::string UPDATE_TARGET = "CHANGETARGET";
 const std::string UPDATE_ADDRESS = "CHANGEADDRESS";
@@ -47,10 +42,6 @@ const std::string SPEED_REPORT = "SPEEDREPORT";
 const std::string TEST_NOSOHASH_COMMAND = "TESTHASH";
 const std::string TEST_HASH_COMMAND = "TESTHASH";
 const std::string TEST_MINER_COMMAND = "TESTMINER";
-
-// Variables for speedReport
-auto          lastSpeedStamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-std::uint32_t lastSpeedCount { 0 };
 
 const char NOSOHASH_HASHEABLE_CHARS[] {
     "!\"#$%&')*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" };
@@ -254,11 +245,11 @@ class CMineThread {
 protected:
     char m_address[32];
     char m_prefix[10];
-    //std::uint32_t m_blck_no { 0 };
     char best_diff[33] { NOSO_MAX_DIFF };
     char m_lb_hash[33];
-    //std::uint32_t m_computed_hashes_count { 0 };
-    std::uint32_t noso_hash_counter { 0 };
+    std::uint64_t noso_hash_counter { 0 };
+    std::uint64_t lastCount { 0 };
+    std::uint64_t lastTimeStamp { 0 };
 public:
     CMineThread( const char prefix[10], const char address[32] ) {
         assert( strlen( prefix ) == 9 && ( strlen( address ) == 30 || strlen( address ) == 31 ) );
@@ -271,16 +262,30 @@ public:
     }
     void UpdateTargetDiff(const char target_diff[33]){
         assert( strlen( target_diff ) == 32 );
-        strcpy( best_diff, target_diff);
-    }
-    void UpdateComputedHashesCount( std::uint32_t more ) {
-        noso_hash_counter += more;
+
+        if(strcmp(best_diff, target_diff) != 0){
+            strcpy( best_diff, target_diff);
+        }
     }
     void ResetComputedHashesCount() {
         noso_hash_counter = 0;
+        lastCount = 0;
+        lastTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    }
+
+    std::uint64_t GetAverageSpeed(){
+        std::uint64_t instantCount = noso_hash_counter;
+        std::uint64_t instantStamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+        std::uint64_t realCount = instantCount - lastCount;
+        std::uint64_t realTime = instantStamp - lastTimeStamp;
+
+        lastCount = instantCount;
+        lastTimeStamp = instantStamp;
+        return ((realCount*1000)/(realTime));
     }
     
-    std::uint32_t GetComputedHashesCount() {
+    std::uint64_t GetComputedHashesCount() {
         return noso_hash_counter;
     }
     
@@ -306,20 +311,19 @@ void tokenize(std::string const &str, const char delim,
 }
 
 void reportSpeed(std::vector<std::shared_ptr<CMineThread>> mine_objects){
-    std::uint32_t newSpeedCounter = std::accumulate(
-                    mine_objects.begin(), mine_objects.end(), 0,
-                    []( int a, const std::shared_ptr<CMineThread> &o ) { return a + o->GetComputedHashesCount(); } );
-    auto lastEndStamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    std::cout << "SPEEDREPORT " << (newSpeedCounter*1000)/(lastEndStamp-lastSpeedStamp) << std::endl;
-    lastSpeedCount = newSpeedCounter;
-    lastSpeedStamp = lastEndStamp;
+
+    std::uint64_t totalHashed = 0;
+    for ( auto mo : mine_objects ){
+        totalHashed += mo->GetAverageSpeed();
+    }
+
+    std::cout << "SPEEDREPORT " << totalHashed << std::endl;
 }
 
 
 int main() {
     bool closeMiner = false;
     std::string line;
-
     std::vector<std::thread> mine_threads;
     std::vector<std::shared_ptr<CMineThread>> mine_objects;
 
@@ -356,7 +360,7 @@ int main() {
 
                 char target_diff[33];
                 strcpy( target_diff, newTargetDiff.c_str());
-                
+
                 for ( auto mo : mine_objects ){
                     mo->UpdateTargetHash(lb_hash);
                     mo->UpdateTargetDiff(target_diff);
@@ -371,11 +375,6 @@ int main() {
             std::string miningAddress = lineParams[3]; // MinerAddress
             std::string targetHash = lineParams[4]; // MinerAddress
             std::string targetDiff = lineParams[5]; // MinerAddress
-            
-            std::cout << "Address: " << miningAddress << std::endl;
-            std::cout << "MinerID: " << minerID << std::endl;
-            std::cout << "TargetHash: " << targetHash << std::endl;
-            std::cout << "TargetDiff: " << targetDiff << std::endl;
             
             const std::string miner_prefix { nosohash_prefix( minerID ) };
             auto miner_thread_prefix = []( int num, const std::string &prefix ) {
@@ -399,15 +398,47 @@ int main() {
             char target_diff[33];
             strcpy( target_diff, targetDiff.c_str());
             for ( auto mo : mine_objects ){ mo->UpdateTargetHash(lb_hash); mo->UpdateTargetDiff(target_diff);}
+            for ( std::uint32_t i = 0; i < maxCPU; i++ ){
+                mine_threads.emplace_back( &CMineThread::Mine, mine_objects[i] );
+            }
+        }else if(lineParams[0] == MINE_POOL_COMMAND){
+            mining = true;
+            hashtest = false;
+            int maxCPU = stoi(lineParams[1]); // CPU cores to Use
+            std::string minerID = lineParams[2]; // MinerID
+            std::string miningAddress = lineParams[3]; // MinerAddress
+            std::string targetHash = lineParams[4]; // MinerAddress
+            std::string targetDiff = lineParams[5]; // MinerAddress
             
-            lastSpeedStamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-            for ( std::uint32_t i = 0; i < g_threads_count; i++ ){
+            const std::string miner_prefix { minerID };
+            auto miner_thread_prefix = []( int num, const std::string &prefix ) {
+                std::string result = std::string { prefix + nosohash_prefix( num ) };
+                result.append( 9 - result.size(), '!' );
+                return result; 
+            };
+            std::vector<std::string> miner_thread_prefixes;
+
+            for ( std::uint32_t i = 0; i < maxCPU; i++ ) {
+                miner_thread_prefixes.push_back( miner_thread_prefix( i, miner_prefix ) );
+            }
+
+            for ( std::uint32_t i = 0; i < maxCPU; i++ ){
+                mine_objects.push_back( std::make_shared<CMineThread>( miner_thread_prefixes[i].c_str(), miningAddress.c_str() ) );
+            }
+
+            // Set Target and Diff values
+            char lb_hash[33];
+            strcpy( lb_hash, targetHash.c_str());
+            char target_diff[33];
+            strcpy( target_diff, targetDiff.c_str());
+            for ( auto mo : mine_objects ){ mo->UpdateTargetHash(lb_hash); mo->UpdateTargetDiff(target_diff);}
+            for ( std::uint32_t i = 0; i < maxCPU; i++ ){
                 mine_threads.emplace_back( &CMineThread::Mine, mine_objects[i] );
             }
         }else if(lineParams[0] == TEST_HASH_COMMAND){
             // Parse the CPU's number
             g_threads_count = stoi(lineParams[1]);
-
+            
             // Set Mining and Test values to true
             mining = true;
             hashtest = true;
@@ -455,7 +486,7 @@ int main() {
             mining = false;
             
             // Compute Speed
-            std::uint32_t computed_hashes_count = std::accumulate(
+            std::uint64_t computed_hashes_count = std::accumulate(
                     g_mine_objects.begin(), g_mine_objects.end(), 0,
                     []( int a, const std::shared_ptr<CMineThread> &o ) { return a + o->GetComputedHashesCount(); } );
 
@@ -527,38 +558,31 @@ int main() {
     return 0;
 }
 
-#define COUT_NOSO_TIME std::cout << NOSO_TIMESTAMP << "(" << std::setfill('0') << std::setw(3) << NOSO_BLOCK_AGE << "))"
-
-std::mutex mtx_print;
-
 void CMineThread::Mine() {
     CNosoHasher noso_hasher( m_prefix, m_address );
     this->ResetComputedHashesCount();
     char best_base[19];
     char best_hash[33];
-    char sent_diff[33] { NOSO_MAX_DIFF };
+
+    lastTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         
     while (mining) {
         const char *base { noso_hasher.GetBase( noso_hash_counter++ ) };
         const char *hash { noso_hasher.GetHash() };
         const char *diff { noso_hasher.GetDiff( m_lb_hash ) };
-
+                
         if ( strcmp( diff, best_diff ) < 0 ) {
             strcpy( best_diff, diff );
             strcpy( best_hash, hash );
             strcpy( best_base, base );
-        }
-        
-        if ( strcmp( best_diff, sent_diff ) < 0 ) {
-            //std::cout << "SOLUTION " << m_blck_no << " " << best_base << " " << best_hash << " " << best_diff  << std::endl;
-            strcpy( sent_diff, best_diff );
+
+            if(!hashtest){
+                std::cout << "SOLUTION -> TARGET: " << m_lb_hash << " HASH: " << best_base << " DIFF: " << best_diff  << std::endl;
+            }
         }
 
         if(hashtest && noso_hash_counter >= NOSOHASH_TEST_MAX){
             break;
         }
     }
-
-    //this->UpdateComputedHashesCount( noso_hash_counter );
-    //m_blck_no = 0;
 }

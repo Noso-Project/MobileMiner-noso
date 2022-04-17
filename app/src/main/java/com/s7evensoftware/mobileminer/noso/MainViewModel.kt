@@ -7,12 +7,17 @@ import kotlinx.coroutines.Job
 
 class MainViewModel: ViewModel() {
 
+    // Pool Variables
+    var isFirstRun = true
+    var currentPool = PoolData()
+    var poolString = MutableLiveData(DEFAULT_POOL_STRING)
+
     var LastNodeSelected:NodeInfo? = null
 
     // General and Settings Values
     var MinerAddress = MutableLiveData(DEFAULT_ADDRESS)
     var CPUtoUse = MutableLiveData(1)
-    var isSoloMining = true
+    var isSoloMining = MutableLiveData(true)
 
     var MinerSynced = MutableLiveData(MINER_SYNC_PENDING)
     var concensusResult:ConcensusResult? = null
@@ -68,7 +73,7 @@ class MainViewModel: ViewModel() {
      * @return returns true if is solo mining and false if is pool mining
      */
     fun getMiningMode():Boolean {
-        return isSoloMining
+        return isSoloMining.value == true
     }
 
 }

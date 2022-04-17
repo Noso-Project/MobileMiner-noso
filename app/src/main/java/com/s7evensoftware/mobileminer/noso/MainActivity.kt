@@ -13,16 +13,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
-import com.google.android.material.navigation.NavigationView
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.s7evensoftware.mobileminer.noso.Fragments.HomeFragment
 import com.s7evensoftware.mobileminer.noso.Fragments.LogsFragment
 import com.s7evensoftware.mobileminer.noso.Fragments.SettingsFragment
 import com.s7evensoftware.mobileminer.noso.databinding.ActivityMainBinding
-import il.co.theblitz.observablecollections.enums.ObservableCollectionsAction
 import kotlinx.coroutines.*
 import java.io.*
 import kotlin.coroutines.CoroutineContext
@@ -128,7 +125,8 @@ class MainActivity :
         viewModel.MinerAddress.value = sharedPref.getString(SHAREDPREF_ADDRESS, DEFAULT_ADDRESS)
         viewModel.CPUtoUse.value = sharedPref.getInt(SHAREDPREF_CPUS, DEFAULT_CPUS)
         viewModel.MinerID = sharedPref.getInt(SHAREDPREF_MINERID, DEFAULT_MINER_ID)
-        viewModel.isSoloMining = sharedPref.getBoolean(SHAREDPREF_MODE, DEFAULT_MINING_MODE)
+        viewModel.isSoloMining.value = sharedPref.getBoolean(SHAREDPREF_MODE, DEFAULT_MINING_MODE)
+        viewModel.poolString.value = sharedPref.getString(SHAREDPREF_POOL, DEFAULT_POOL_STRING)
     }
 
     private fun PrepareViews() {
@@ -136,68 +134,116 @@ class MainActivity :
         binding.mainBottomMenu.setOnItemSelectedListener(this)
 
         //Observers
-        viewModel.MinerSynced.observe(this, { syncStatus ->
-            when(syncStatus){
+        viewModel.MinerSynced.observe(this) { syncStatus ->
+            when (syncStatus) {
                 MINER_SYNC_DONE -> {
-                    Log.e("Main","Miner Sync Completed")
+                    Log.e("Main", "Miner Sync Completed")
                     viewModel.OutPutInfo += "\n#####################################\n"
                     viewModel.OutPutInfo += "# Miner Synchronized \n"
                     viewModel.RealTimeValue.value = System.currentTimeMillis()
 
-                    viewModel.concensusResult?.let { result ->
-                        if(result.LastBlock > viewModel.LastBlock.value?:0){
-                            viewModel.TargetHash.postValue(result.LBHash)
-                            viewModel.TargetDiff.postValue(result.NMSDiff)
-                            viewModel.TargetDiffStatic = result.NMSDiff
-                            viewModel.LastBlock.postValue(result.LastBlock)
-                            Log.e("Network","New Values -> targetHash:${result.LBHash} targetDiff:${result.NMSDiff} LastBlock: ${result.LastBlock} ")
-                            sendCommand("$UPDATE_BLOCK_COMMAND ${result.LBHash} ${result.NMSDiff}")
+                    if(viewModel.isSoloMining.value == true){
+                        viewModel.concensusResult?.let { result ->
+                            if (result.LastBlock > viewModel.LastBlock.value ?: 0) {
+                                viewModel.TargetHash.postValue(result.LBHash)
+                                viewModel.TargetDiff.postValue(result.NMSDiff)
+                                viewModel.TargetDiffStatic = result.NMSDiff
+                                viewModel.LastBlock.postValue(result.LastBlock)
+                                Log.e(
+                                    "Network",
+                                    "New Values -> targetHash:${result.LBHash} targetDiff:${result.NMSDiff} LastBlock: ${result.LastBlock} "
+                                )
+                                //sendCommand("$UPDATE_BLOCK_COMMAND ${result.LBHash} ${result.NMSDiff}")
+                            }
+
+                            if (result.NMSDiff < viewModel.TargetDiff.value!!) {
+                                viewModel.TargetDiff.postValue(result.NMSDiff)
+                                viewModel.TargetDiffStatic = result.NMSDiff
+                            }
+
+                            viewModel.BlockAge.value =
+                                System.currentTimeMillis() / 1000 - result.LBTimeEnd
+                            startBlockCounter()
+                            viewModel.OutPutInfo += "# Block: ${result.LastBlock} \n# Age: ${viewModel.BlockAge.value} secs \n# Hash: ${result.LBHash}\n"
+                            viewModel.OutPutInfo += "#####################################\n"
+
+                            if (viewModel.pendingMinerStart) {
+                                viewModel.isMining = true
+                                viewModel.pendingMinerStart = false
+                                sendCommand("$MINE_COMMAND ${viewModel.getCPUtoUse()} ${viewModel.MinerID} ${viewModel.getMinerAddres()} ${result.LBHash} ${result.NMSDiff}")
+                                speedReportTask()
+                            }
+
+                            if (viewModel.BlockAge.value!! >= BLOCK_DEFAULT_TIME) {
+                                SyncMiner()
+                            } else {
+                                viewModel.MinerSynced.value = MINER_MINNING
+                            }
+                        }
+                    }else{
+                        var newBlock = false
+                        if (viewModel.currentPool.CurrentBlock > viewModel.LastBlock.value ?: 0) {
+                            newBlock = true
+                            viewModel.TargetHash.postValue(viewModel.currentPool.TargetHash)
+                            viewModel.TargetDiff.postValue(viewModel.currentPool.TargetDiff)
+                            viewModel.LastBlock.postValue(viewModel.currentPool.CurrentBlock)
+
+                            Log.e("Main","Sync Completed:")
+                            Log.e("Main","TargetHash:${viewModel.currentPool.TargetHash}")
+                            Log.e("Main","TargetDiff:${viewModel.currentPool.TargetDiff}")
+                            Log.e("Main","LastBlock: ${viewModel.currentPool.CurrentBlock}")
+
+                            //sendCommand("$UPDATE_BLOCK_COMMAND ${viewModel.currentPool.TargetHash} ${viewModel.currentPool.TargetDiff}")
                         }
 
-                        if(result.NMSDiff < viewModel.TargetDiff.value!!){
-                            viewModel.TargetDiff.postValue(result.NMSDiff)
-                            viewModel.TargetDiffStatic = result.NMSDiff
+                        if (viewModel.currentPool.TargetDiff < viewModel.TargetDiff.value!!) {
+                            viewModel.TargetDiff.postValue(viewModel.currentPool.TargetDiff)
+                            viewModel.TargetDiffStatic = viewModel.currentPool.TargetDiff
                         }
 
-                        viewModel.BlockAge.value = System.currentTimeMillis()/1000-result.LBTimeEnd
-                        startBlockCounter()
-                        viewModel.OutPutInfo += "# Block: ${result.LastBlock} \n# Age: ${viewModel.BlockAge.value} secs \n# Hash: ${result.LBHash}\n"
+                        if(newBlock){
+                            viewModel.BlockAge.value = (System.currentTimeMillis()%600000) / 1000
+                            startBlockCounter()
+                        }
+
+                        viewModel.OutPutInfo += "# Block: ${viewModel.currentPool.CurrentBlock} \n# Age: ${viewModel.BlockAge.value} secs \n# Hash: ${viewModel.currentPool.TargetHash}\n" +
+                                "# TDiff: ${viewModel.currentPool.TargetDiff}\n"
                         viewModel.OutPutInfo += "#####################################\n"
 
-                        if(viewModel.pendingMinerStart){
+                        if (viewModel.pendingMinerStart) {
                             viewModel.isMining = true
                             viewModel.pendingMinerStart = false
-                            sendCommand("$MINE_COMMAND ${viewModel.getCPUtoUse()} ${viewModel.MinerID} ${viewModel.getMinerAddres()} ${result.LBHash} ${result.NMSDiff}")
+                            sendCommand("$MINE_POOL_COMMAND ${viewModel.getCPUtoUse()} ${viewModel.currentPool.MinerID} ${viewModel.currentPool.NosoAddress} ${viewModel.currentPool.TargetHash} ${viewModel.currentPool.TargetDiff}")
                             speedReportTask()
                         }
 
-                        if(viewModel.BlockAge.value!! >= BLOCK_DEFAULT_TIME){
+                        if (viewModel.BlockAge.value!! >= BLOCK_DEFAULT_TIME) {
                             SyncMiner()
-                        }else{
+                        } else {
                             viewModel.MinerSynced.value = MINER_MINNING
                         }
                     }
                 }
             }
-        })
+        }
 
-        viewModel.BlockAge.observe(this, { currentAge ->
-            if(currentAge == (BLOCK_DEFAULT_TIME-1).toLong()){
-                Log.e("Main","New Block Needed")
+        viewModel.BlockAge.observe(this) { currentAge ->
+            if (currentAge == (BLOCK_DEFAULT_TIME - 1).toLong()) {
                 viewModel.MinerSynced.value = MINER_BLOCK_CHANGE
+                minerSoftStop()
                 SyncMiner()
             }
-        })
+        }
 
-        viewModel.SolutionsCatcher.observe(this, { solution ->
-            if(solution != null){
+        viewModel.SolutionsCatcher.observe(this) { solution ->
+            if (solution != null) {
                 PushSolution(solution)
             }
-        })
+        }
 
-        viewModel.TargetDiff.observe(this, { newTarget ->
+        viewModel.TargetDiff.observe(this) { newTarget ->
             sendCommand("$UPDATE_TARGET_COMMAND $newTarget")
-        })
+        }
 
         //Set primary fragment
         supportFragmentManager
@@ -212,9 +258,11 @@ class MainActivity :
             viewModel.speedReportJob?.cancel()
         }
         viewModel.speedReportJob = launch {
+            var firstRep = true
             while(viewModel.isMining){
-                delay(5000)
-                sendCommand("$SPEEDREPORT_COMMAND")
+                delay(if(firstRep){5000} else {30000})
+                sendCommand(SPEEDREPORT_COMMAND)
+                firstRep = false
             }
         }
     }
@@ -237,7 +285,7 @@ class MainActivity :
         StartMiner()
     }
 
-    fun copyBinaries(){
+    private fun copyBinaries(){
         val privatePath = filesDir.absolutePath
         var assetPath = "miner"
         Tools.copyDirectoryContents(this, assetPath, privatePath)
@@ -258,8 +306,15 @@ class MainActivity :
         val cpuArch = abiParsing.substringBefore("v")
         viewModel.CPUcores = Runtime.getRuntime().availableProcessors()
         viewModel.MinerTestResults = Array(viewModel.CPUcores) { 0 }
-        viewModel.OutPutInfo += "\nCPU Type: $cpuArch"
-        viewModel.OutPutInfo += "\nAvailable Cores: ${viewModel.CPUcores}"
+
+        if(viewModel.isFirstRun){
+            viewModel.OutPutInfo += "\nCPU Type: $cpuArch"
+            viewModel.OutPutInfo += "\nAvailable Cores: ${viewModel.CPUcores}"
+
+            Log.e("Main","CPU Type: $cpuArch")
+            Log.e("Main","Available Cores: ${viewModel.CPUcores}")
+            viewModel.isFirstRun = false
+        }
 
         // Create Process Builder for miner depending on arch
         val args = arrayOf("./miner_$cpuArch")
@@ -298,15 +353,22 @@ class MainActivity :
     }
 
     private fun SyncMiner() {
-        Log.e("Main","SyncMiner Called")
-        viewModel.OutPutInfo += "Synchronizing Miner...\n"
+        viewModel.OutPutInfo += "\nSynchronizing Miner...\n"
         launch {
-            Log.e("Main","Sync Task Called")
-            while(!Nosocoreunit.CheckSource(viewModel)){
-                delay(1000)
+            if(viewModel.isSoloMining.value == true){
+                while(!Nosocoreunit.CheckSource(viewModel)){
+                    delay(1000)
+                }
+            }else{
+                var poolinfo = viewModel.poolString.value?.split(":")
+                var poolData = Network.getPoolData(poolinfo!![0], Integer.parseInt(poolinfo[1]), viewModel)
+                while(!poolData.Connected){
+                    delay(4000)
+                    poolData = Network.getPoolData(poolinfo[0], Integer.parseInt(poolinfo[1]), viewModel)
+                }
             }
+
             viewModel.MinerSynced.postValue(MINER_SYNC_DONE)
-            Log.e("MAIN","Sync Completed")
         }
     }
 
@@ -354,7 +416,6 @@ class MainActivity :
                     viewModel.SolutionsCatcher.postValue(ns)
                 }
                 SPEEDREPORT_COMMAND -> {
-                    Log.e("Main","Receiving Speed Report: $line")
                     viewModel.MinerRealTimeSpeed.postValue(params[1].toInt())
                 }
             }
@@ -363,11 +424,14 @@ class MainActivity :
     }
 
     fun PushSolution(solution: Solution){
-        if(viewModel.isSoloMining){
+        if(viewModel.isSoloMining.value == true){
             launch {
                 Network.sendSolution(solution, viewModel, DEFAULT_RETRY)
             }
         }else{
+            launch {
+                Network.sendPoolShare(solution, viewModel, DEFAULT_RETRY)
+            }
 
         }
     }
@@ -400,9 +464,18 @@ class MainActivity :
 
     override fun onMinerStop() {
         viewModel.isMining = false
+        viewModel.LastBlock.value = 0
         viewModel.MinerRealTimeSpeed.value = 0
-        viewModel.OutPutInfo += "\nStopping Miner and Miner process \n"
+        viewModel.OutPutInfo += "\nStopping Miner and Miner process"
         coroutineContext.cancelChildren()
+        StartMiner()
+    }
+
+    fun minerSoftStop() {
+        viewModel.isMining = false
+        viewModel.OutPutInfo += "\nStopping Miner until next block..."
+        coroutineContext.cancelChildren()
+        viewModel.pendingMinerStart = true
         StartMiner()
     }
 
@@ -453,7 +526,8 @@ class MainActivity :
             putString(SHAREDPREF_ADDRESS, viewModel.getMinerAddres())
             putInt(SHAREDPREF_MINERID, viewModel.MinerID)
             putInt(SHAREDPREF_CPUS, viewModel.getCPUtoUse())
-            putBoolean(SHAREDPREF_MODE, viewModel.isSoloMining)
+            putBoolean(SHAREDPREF_MODE, viewModel.isSoloMining.value == true)
+            putString(SHAREDPREF_POOL, viewModel.poolString.value)
             apply()
         }
         Toast.makeText(this, R.string.settings_saved_prompt, Toast.LENGTH_SHORT).show()

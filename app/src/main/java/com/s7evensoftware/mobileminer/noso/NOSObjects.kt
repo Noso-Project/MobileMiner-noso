@@ -8,6 +8,20 @@ class NOSObjects {
 
 }
 
+class PoolData {
+    var Address:String = ""
+    var Port:Int = 8080
+    var MinerID:String = ""
+    var NosoAddress:String = ""
+    var Connected:Boolean = false
+    var CurrentBlock:Long = 0
+    var TargetHash:String = ""
+    var TargetDiff:String = ""
+    var PoolBalance:Long = 0L
+    var PoolTilPayment:Int = 30
+    var PoolPayStr:String = ""
+}
+
 class ConcensusResult {
     var Address:String = ""
     var Port:Int = 8080

@@ -1,6 +1,7 @@
 package com.s7evensoftware.mobileminer.noso
 
 import android.util.Log
+import androidx.core.util.Pools
 import kotlinx.coroutines.delay
 import java.io.*
 import java.net.ConnectException
@@ -116,6 +117,133 @@ class Network {
                 Log.e("mpNetwork","Unhandled Exception: "+e.message)
             }
             return NodeInfo()
+        }
+
+        fun getPoolData(address: String, port: Int, viewModel: MainViewModel):PoolData {
+            val serverAddress = InetSocketAddress(address, port)
+            Log.e("mpNetwork","Connecting to Pool:  $address:$port")
+            try{
+                val clientSocket = Socket()
+                clientSocket.connect(serverAddress, NODE_TIMEOUT)
+                val clientChannel = PrintWriter(BufferedWriter(OutputStreamWriter(clientSocket.getOutputStream())), true)
+                val inputStreamReader = InputStreamReader(clientSocket.getInputStream())
+                val bufferReader = BufferedReader(inputStreamReader)
+
+                clientChannel.println(
+                    "SOURCE ${viewModel.MinerAddress}")
+                val response = bufferReader.readLine()
+                clientSocket.close()
+
+                val poolInfo = response.split(" ")
+
+                if(poolInfo[0] == "OK"){
+                    val poolData = PoolData()
+                    poolData.Address = address
+                    poolData.Port = port
+
+                    poolData.MinerID = poolInfo[1]
+                    poolData.NosoAddress = poolInfo[2]
+                    poolData.TargetDiff = poolInfo[3]
+                    poolData.TargetHash = poolInfo[4]
+                    poolData.CurrentBlock = poolInfo[5].toLong()
+                    poolData.PoolBalance = poolInfo[6].toLong()
+                    poolData.PoolTilPayment = poolInfo[7].toInt()
+                    poolData.PoolPayStr = poolInfo[8]
+
+                    if(poolData.CurrentBlock > viewModel.LastBlock.value!!){
+                        Log.e("Network", "Poll Connection: $response")
+                        poolData.Connected = true
+                    }
+
+                    viewModel.currentPool =  poolData
+                    return poolData
+                }
+
+                return PoolData()
+            }catch (t: SocketTimeoutException){
+                Log.e("mpNetwork","Connection to $address:$port TimedOut, retrying...")
+                return PoolData()
+            }catch (c: ConnectException){ // No internet ?
+                Log.e("mpNetwork","Connection error, check the internet, retrying...")
+                return PoolData()
+            }catch (r: java.io.IOException){ // No internet ?
+                Log.e("mpNetwork","Reading error, malformed input? : ${r.message}")
+                return PoolData()
+            }catch (e:java.lang.Exception){ // Something else....
+                Log.e("mpNetwork","Unhandled Exception: $e")
+                return PoolData()
+            }
+        }
+
+        suspend fun sendPoolShare(
+            solution: Solution,
+            viewModel: MainViewModel,
+            retries: Int
+        ):Boolean {
+            val serverAddress = InetSocketAddress(viewModel.currentPool.Address, viewModel.currentPool.Port)
+            Log.e("mpNetwork","Sending Share to ${viewModel.currentPool.Address}:${viewModel.currentPool.Port}")
+            try{
+                val clientSocket = Socket()
+                clientSocket.connect(serverAddress, NODE_TIMEOUT)
+                val clientChannel = PrintWriter(BufferedWriter(OutputStreamWriter(clientSocket.getOutputStream())), true)
+                val inputStreamReader = InputStreamReader(clientSocket.getInputStream())
+                val bufferReader = BufferedReader(inputStreamReader)
+
+                clientChannel.println(
+                    "SHARE ${viewModel.MinerAddress} ${solution.Hash}")
+                val response = bufferReader.readLine()
+                clientSocket.close()
+
+                Log.e("Network", "Solution Response(Share): $response")
+                val Result = response.split(" ")
+                val accepted = Result[0].toBoolean()
+
+                if(accepted){
+                    Log.e("Network","Solution Sent was accepted")
+                    viewModel.OutPutInfo += "\n\n################################"
+                    viewModel.OutPutInfo += "\nSending Solution"
+                    viewModel.OutPutInfo += "\nTarget: ${solution.Target}"
+                    viewModel.OutPutInfo += "\nHash: ${solution.Hash}"
+                    viewModel.OutPutInfo += "\nDiff: ${solution.Diff}"
+                    viewModel.OutPutInfo += "\n!!Solution Sent Was Accepted!!"
+                    viewModel.OutPutInfo += "\n################################\n"
+                }else{
+                    // Update Target Diff
+                    if(Result[1] < viewModel.TargetDiffStatic){
+                        viewModel.TargetDiffStatic = Result[1]
+                        viewModel.TargetDiff.postValue(Result[1])
+                    }
+
+                    Log.e("Network","Solution Sent Rejected")
+                    viewModel.OutPutInfo += "\n\nSending Solution"
+                    viewModel.OutPutInfo += "\nTarget: ${solution.Target}"
+                    viewModel.OutPutInfo += "\nHash: ${solution.Hash}"
+                    viewModel.OutPutInfo += "\nDiff: ${solution.Diff}"
+                    viewModel.OutPutInfo += "\nSolution Sent Was Rejected\n"
+                }
+                viewModel.TriggerOutputUpdate.postValue(viewModel.OutPutInfo.length)
+                return accepted
+            }catch (t: SocketTimeoutException){
+                Log.e("mpNetwork","Request to ${viewModel.MinerAddress} -> Timed Out, retrying...")
+                if(retries > 0){
+                    delay((5-retries)*1000L)
+                    return sendPoolShare(solution,viewModel,retries-1)
+                }
+                return false
+            }catch (c: ConnectException){ // No internet ?
+                Log.e("mpNetwork","Connection error, check the internet, retrying...")
+                if(retries > 0){
+                    delay((5-retries)*1000L)
+                    return sendPoolShare(solution,viewModel,retries-1)
+                }
+                return false
+            }catch (r: java.io.IOException){ // No internet ?
+                Log.e("mpNetwork","Reading error, malformed input? : ${r.message}")
+                return false
+            }catch (e:java.lang.Exception){ // Something else....
+                Log.e("mpNetwork","Unhandled Exception: $e")
+                return false
+            }
         }
 
         suspend fun sendSolution(
