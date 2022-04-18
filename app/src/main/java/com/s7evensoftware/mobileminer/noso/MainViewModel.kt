@@ -2,7 +2,6 @@ package com.s7evensoftware.mobileminer.noso
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import il.co.theblitz.observablecollections.full.ObservableArrayList
 import kotlinx.coroutines.Job
 
 class MainViewModel: ViewModel() {

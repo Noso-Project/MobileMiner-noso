@@ -93,7 +93,7 @@
                     android:id="@+id/main_top_pool_balance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="@dimen/general_normal_text"
+                    android:textSize="@dimen/general_small_text"
                     android:textColor="@color/colorBlack"
                     android:text="0.00000000"/>
             </LinearLayout>

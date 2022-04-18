@@ -1,7 +1,5 @@
 package com.s7evensoftware.mobileminer.noso
 
-import android.util.Log
-import androidx.core.util.Pools
 import kotlinx.coroutines.delay
 import java.io.*
 import java.net.ConnectException
@@ -11,7 +9,6 @@ import java.net.SocketTimeoutException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
-import kotlin.collections.ArrayList
 
 class Network {
     companion object {

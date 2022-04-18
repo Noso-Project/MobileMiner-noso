@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
@@ -75,7 +74,12 @@ class MainActivity :
     }
 
     private fun RequestPermissions() {
-        if (ContextCompat.checkSelfPermission(
+        if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.READ_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
                 applicationContext,
                 Manifest.permission.ACCESS_NETWORK_STATE
             )
@@ -89,7 +93,9 @@ class MainActivity :
                 this,
                 arrayOf(
                     Manifest.permission.ACCESS_NETWORK_STATE,
-                    Manifest.permission.INTERNET
+                    Manifest.permission.INTERNET,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ),
                 1
             )
@@ -368,13 +374,13 @@ class MainActivity :
                 }
             } catch (i: InterruptedIOException){
                 viewModel.OutPutInfo += "\n# Miner process reader got closed"
-                Log.w("Main", "Error reading process input: $i")
+                Log.e("Main", "Error reading process input: $i")
             } catch (e: IOException) {
                 viewModel.OutPutInfo += "\n# Error reading process input: $e"
-                Log.w("Main", "Error reading process input: $e")
+                Log.e("Main", "Error reading process input: $e")
             }catch (n: NullPointerException){
                 viewModel.OutPutInfo += "\nProcess was killed"
-                Log.w("Main", "Process was killed")
+                Log.e("Main", "Process was killed")
                 viewModel.MinerProcessStatus = MINER_PROCESS_KILLED
             }
         }
@@ -469,7 +475,7 @@ class MainActivity :
             writer.write("$command\n")
             writer.flush()
         } catch (e: Exception) {
-            Log.w("Main", "exception", e)
+            Log.e("Main", "exception $e")
         }
     }
 

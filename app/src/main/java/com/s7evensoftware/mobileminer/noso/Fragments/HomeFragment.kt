@@ -2,12 +2,10 @@ package com.s7evensoftware.mobileminer.noso.Fragments
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ScrollView
 import androidx.lifecycle.ViewModelProvider
 import com.s7evensoftware.mobileminer.noso.*
 import com.s7evensoftware.mobileminer.noso.databinding.AutotestRowSpeedBinding

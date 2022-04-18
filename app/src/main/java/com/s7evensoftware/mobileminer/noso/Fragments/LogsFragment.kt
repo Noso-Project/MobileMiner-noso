@@ -1,16 +1,13 @@
 package com.s7evensoftware.mobileminer.noso.Fragments
 
-import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.s7evensoftware.mobileminer.noso.MainViewModel
-import com.s7evensoftware.mobileminer.noso.R
-import com.s7evensoftware.mobileminer.noso.databinding.FragmentHomeBinding
 import com.s7evensoftware.mobileminer.noso.databinding.FragmentLogsBinding
 
 class LogsFragment : Fragment() {
@@ -25,7 +22,7 @@ class LogsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         viewModel = ViewModelProvider(requireActivity()).get(MainViewModel::class.java)
         binding = FragmentLogsBinding.inflate(layoutInflater)
@@ -37,11 +34,11 @@ class LogsFragment : Fragment() {
 
         binding.logsFragmentContainer.clipToOutline = true
 
-        viewModel.TriggerOutputUpdate.observe(viewLifecycleOwner, {
-            binding.logsFragmentOutput.setText(viewModel.OutPutInfo)
+        viewModel.TriggerOutputUpdate.observe(viewLifecycleOwner) {
+            binding.logsFragmentOutput.text = viewModel.OutPutInfo
             binding.logsFragmentScrollview.post {
                 binding.logsFragmentScrollview.fullScroll(ScrollView.FOCUS_DOWN)
             }
-        })
+        }
     }
 }

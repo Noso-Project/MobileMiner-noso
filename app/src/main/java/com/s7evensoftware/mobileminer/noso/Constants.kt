@@ -4,6 +4,9 @@ const val SOURCE = "mainnet"
 const val DEFAULT_ADDRESS = "NHsx5MnV7UrNubBshnhpSnBuwKaqGw"
 const val DEFAULT_CPUS = 1
 const val DEFAULT_MINING_MODE = true // true = solo mining // false = pool mining
+const val NOSPath             = "NOSODATA" // directory
+const val LogsDirectory       = "LOGS" // directory
+const val LogsFilename        = "error_log.txt" // directory
 
 const val NODE_TIMEOUT        = 1500
 const val DELTA_TRIGGER       = true // ff false then nodes with Delta > 0 will be excluded from node selection

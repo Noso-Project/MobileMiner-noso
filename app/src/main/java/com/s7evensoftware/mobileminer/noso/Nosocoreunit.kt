@@ -1,14 +1,90 @@
 package com.s7evensoftware.mobileminer.noso
 
-import android.util.Log
+import android.content.Context
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
+import java.io.IOException
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.absoluteValue
 
 class Nosocoreunit {
 
     companion object {
+
+        lateinit var context:Context
+
+        @JvmName("setContext1") // fix for declaration name
+        fun setContext(context: Context){
+            this.context = context
+        }
+
+        fun appendLog(origen:String, content:String){
+            val fileLog = File(
+                context.getExternalFilesDir(null)!!.path
+                        +File.separator
+                        +NOSPath
+                        +File.separator
+                        +LogsDirectory
+                        +File.separator
+                        +LogsFilename)
+
+            try{
+                if(!fileLog.exists()){
+                    fileLog.parentFile.mkdirs()
+                    fileLog.createNewFile()
+                }else{
+                    if(fileLog.length() >= 51200){
+                        if(fileLog.delete()){
+                            Log.e("mpDisk","Log file cleared - OK")
+                            fileLog.createNewFile()
+                        }else{
+                            Log.e("mpDisk","Error clearing Log file - ERR")
+                        }
+
+                    }
+                }
+
+                val buffWrt = BufferedWriter(FileWriter(fileLog, true))
+                val currentTime = System.currentTimeMillis()
+                val formattedLine = getDateFromUNIX(currentTime)+" "+
+                        getTimeFromUNIX(currentTime)+" : "+
+                        origen+" -> "+
+                        content
+                buffWrt.append(formattedLine)
+                buffWrt.newLine()
+                buffWrt.close()
+            }catch (i: IOException){
+                Log.e("mpDisk","Error writing log file: "+i.message)
+            }
+        }
+
+        fun getDateFromUNIX(time:Long):String{
+            try {
+                val formatter = SimpleDateFormat("dd/MM/yyyy")
+                formatter.timeZone = TimeZone.getTimeZone("UTC")
+                return formatter.format(time)
+            }catch (e:Exception){
+                Log.e("mpFunctions","Error parsing date")
+            }
+            return "00/00/0000"
+        }
+
+        fun getTimeFromUNIX(time:Long):String{
+            try {
+                val formatter = SimpleDateFormat("HH:mm:ss")
+                formatter.timeZone = TimeZone.getTimeZone("UTC")
+                return formatter.format(time)
+            }catch (e:Exception){
+                Log.e("mpFunctions","Error parsing date")
+            }
+            return "00:00:00"
+        }
 
         fun Long2Currency(balance:Long):String{
             var balanceStr = (balance.absoluteValue).toString()
