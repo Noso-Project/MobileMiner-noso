@@ -204,7 +204,7 @@ class Network {
                 val bufferReader = BufferedReader(inputStreamReader)
 
                 clientChannel.println(
-                    "SHARE ${viewModel.MinerAddress} ${solution.Hash}")
+                    "SHARE ${viewModel.MinerAddress.value} ${solution.Hash}")
                 val response = bufferReader.readLine()
                 clientSocket.close()
 
