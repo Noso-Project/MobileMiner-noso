@@ -30,7 +30,7 @@
                         android:layout_height="@dimen/home_speedmeter_size"
                         android:layout_gravity="center_horizontal"
                         app:sv_minSpeed="0"
-                        app:sv_maxSpeed="40000"
+                        app:sv_maxSpeed="200000"
                         app:sv_textColor="@color/colorTransparent"
                         app:sv_speedTextColor="@color/colorTransparent"
                         app:sv_unitTextColor="@color/colorTransparent"
@@ -44,8 +44,8 @@
                         android:layout_gravity="center_horizontal"
                         app:sv_speedTextSize="30sp"
                         app:sv_textColor="@color/colorTransparent"
-                        app:sv_minSpeed="100"
-                        app:sv_maxSpeed="40000"
+                        app:sv_minSpeed="0"
+                        app:sv_maxSpeed="200000"
                         app:sv_unit=" H/s"
                         android:translationZ="3dp"/>
                 </FrameLayout>

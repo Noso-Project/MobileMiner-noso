@@ -188,6 +188,27 @@ func mutateHash(sHash string) string {
 	return LHash
 }
 
+func BinToHexFast(b byte) rune {
+	bin2hex_lookip := []rune{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'}
+
+	if b > 15 {
+		return 0
+	}
+
+	return bin2hex_lookip[b]
+}
+
+func HexToBinFast(c rune) byte {
+	a := rune('0')
+	f := rune('F')
+
+	hex2bin_lookup := []byte("0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15")
+
+	if c > '0' && c <= '9' || c >= 'A' && c <= 'F' {
+
+	}
+}
+
 func NosoHash(source string) string {
 	var FinalHASH string
 	var ThisSUM int

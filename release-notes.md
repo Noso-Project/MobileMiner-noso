@@ -1,2 +1,3 @@
-## Version 1.0.2
-- Fixed issue during artifact download, it was placed in the wrong path
+## Version 1.0.3
+- Pool mining implemented
+- Miner core changed from go to c based on noso-2m by f04ver

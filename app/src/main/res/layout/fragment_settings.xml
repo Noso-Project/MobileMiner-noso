@@ -148,7 +148,6 @@
                         android:id="@+id/settings_fragment_mode"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:enabled="false"
                         android:paddingHorizontal="@dimen/general_small_padding"/>
                     <TextView
                         android:layout_width="wrap_content"
@@ -160,6 +159,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/settings_fragment_minerid_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
@@ -192,9 +192,37 @@
                         app:np_max="8100"/>
                 </LinearLayout>
 
-
-
-
+                <LinearLayout
+                    android:id="@+id/settings_fragment_source_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/general_normal_text"
+                        android:textColor="@color/colorBlack"
+                        android:text="Pool Connection String: "/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <EditText
+                            android:id="@+id/settings_fragment_pool_source"
+                            android:layout_width="0dp"
+                            android:imeOptions="actionDone"
+                            android:inputType="textShortMessage|textNoSuggestions|textCapWords"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/background_corner_rounded_white"
+                            android:backgroundTint="@color/colorGrayIntense"
+                            android:padding="@dimen/general_normal_padding"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="@dimen/general_small_text"
+                            android:layout_weight="1"/>
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
