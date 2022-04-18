@@ -1,2 +1,2 @@
 ## Version 1.0.4
-- There was an important issue that was sending the shares with an invalid noso address (wrong variable was being called), is now fixed
+- More fixes of the wrong set variable (This time it should work fine, I have double checked it)

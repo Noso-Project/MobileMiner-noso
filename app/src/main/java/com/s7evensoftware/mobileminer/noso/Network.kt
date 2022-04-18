@@ -127,7 +127,7 @@ class Network {
                 val bufferReader = BufferedReader(inputStreamReader)
 
                 clientChannel.println(
-                    "SOURCE ${viewModel.MinerAddress}")
+                    "SOURCE ${viewModel.MinerAddress.value}")
                 val response = bufferReader.readLine()
                 clientSocket.close()
 
@@ -239,7 +239,7 @@ class Network {
                 viewModel.TriggerOutputUpdate.postValue(viewModel.OutPutInfo.length)
                 return accepted
             }catch (t: SocketTimeoutException){
-                Log.e("mpNetwork","Request to ${viewModel.MinerAddress} -> Timed Out, retrying...")
+                Log.e("mpNetwork","Request to ${viewModel.currentPoolStatic.Address} -> Timed Out, retrying...")
                 if(retries > 0){
                     delay((5-retries)*1000L)
                     return sendPoolShare(solution,viewModel,retries-1)
@@ -276,7 +276,7 @@ class Network {
                 val bufferReader = BufferedReader(inputStreamReader)
 
                 clientChannel.println(
-                    "BESTHASH 1 2 3 4 ${viewModel.MinerAddress} ${solution.Hash} ${viewModel.LastBlock.value?.plus(1)} ${System.currentTimeMillis()/1000}")
+                    "BESTHASH 1 2 3 4 ${viewModel.MinerAddress.value} ${solution.Hash} ${viewModel.LastBlock.value?.plus(1)} ${System.currentTimeMillis()/1000}")
                 val response = bufferReader.readLine()
                 clientSocket.close()
 
@@ -309,7 +309,7 @@ class Network {
                 viewModel.TriggerOutputUpdate.postValue(viewModel.OutPutInfo.length)
                 return accepted
             }catch (t: SocketTimeoutException){
-                Log.e("mpNetwork","Request to ${viewModel.MinerAddress} -> Timed Out, retrying...")
+                Log.e("mpNetwork","Request to ${viewModel.concensusResult?.Address} -> Timed Out, retrying...")
                 if(retries > 0){
                     delay((5-retries)*1000L)
                     return sendSolution(solution,viewModel,retries-1)
