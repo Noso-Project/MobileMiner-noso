@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/Noso-Project/MobileMiner-noso/workflows/Build/badge.svg?branch=main)](https://github.com/Noso-Project/MobileMiner-noso/actions)
 [![Supports Android](https://img.shields.io/badge/support-Android-blue?logo=Android)](https://github.com/Noso-Project/MobileMiner-noso/releases/latest)
 [![License](https://img.shields.io/github/license/Noso-Project/MobileMiner-noso)](https://github.com/Noso-Project/MobileMiner-noso/blob/main/LICENSE)
-[![Latest Release](https://img.shields.io/github/v/release/Noso-Project/NosoWallet-Android?label=latest%20release)](https://github.com/Noso-Project/NosoWallet-Android/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/Noso-Project/MobileMiner-noso?label=latest%20release)](https://github.com/Noso-Project/MobileMiner-noso/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/Noso-Project/MobileMiner-noso/total)](https://github.com/Noso-Project/MobileMiner-noso/releases)
 
 MobileMiner is a NOSO miner for android, based on [Consominer](https://github.com/Noso-Project/consominer) and [Noso-2m](https://github.com/f04ever/noso-2m)
