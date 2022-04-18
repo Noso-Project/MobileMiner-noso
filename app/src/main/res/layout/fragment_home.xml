@@ -179,7 +179,7 @@
                             android:layout_height="wrap_content"
                             android:textColor="@color/colorBlack"
                             android:textAlignment="center"
-                            android:text="Developed by\n JZteven"/>
+                            android:text="Developed by\n JZteven\nCore based on noso-2m by f04ever"/>
                     </LinearLayout>
                 </LinearLayout>
 

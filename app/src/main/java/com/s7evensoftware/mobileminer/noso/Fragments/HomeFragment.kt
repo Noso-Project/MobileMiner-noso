@@ -39,6 +39,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
         return binding.root
     }
 
+    fun hideAutoTestResult(){
+        binding.homeFragmentAutotestResults.removeAllViews()
+        binding.homeFragmentAutotestResults.visibility = View.GONE
+    }
+
     private fun RestoreMiner() {
         if(viewModel.isMinerStarted){
             binding.homeFragmentTester.visibility = View.GONE
@@ -61,8 +66,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
         binding.minerStop.setOnClickListener(this)
 
         // Observers
-        viewModel.MinerSynced.observe(viewLifecycleOwner, { status ->
-            when(status){
+        viewModel.MinerSynced.observe(viewLifecycleOwner) { status ->
+            when (status) {
                 MINER_SYNC_PENDING -> {
                     binding.minerStatusDot.drawable.setTint(requireContext().getColor(R.color.colorRedUnsync))
                     binding.minerStatus.setText(R.string.miner_status_syncing)
@@ -80,83 +85,102 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     binding.minerStatus.setText(R.string.miner_status_mining)
                 }
             }
-        })
+        }
 
-        viewModel.BlockAge.observe(viewLifecycleOwner, { age ->
-            if(age <= 600){
+        viewModel.BlockAge.observe(viewLifecycleOwner) { age ->
+            if (age <= 600) {
                 binding.minerBlockAge.text = "$age seg"
             }
-        })
+        }
 
-        viewModel.MinerAddress.observe(viewLifecycleOwner, { address ->
+        viewModel.MinerAddress.observe(viewLifecycleOwner) { address ->
             binding.minerAddress.text = address
-        })
+        }
 
-        viewModel.CPUtoUse.observe(viewLifecycleOwner, { cpus ->
+        viewModel.CPUtoUse.observe(viewLifecycleOwner) { cpus ->
             binding.minerCpuNumber.text = cpus.toString()
-        })
+        }
 
-        viewModel.LastBlock.observe(viewLifecycleOwner, { block ->
+        viewModel.LastBlock.observe(viewLifecycleOwner) { block ->
             binding.minerBlockNumber.text = block.toString()
-        })
+        }
 
-        viewModel.TargetHash.observe(viewLifecycleOwner, { target ->
+        viewModel.TargetHash.observe(viewLifecycleOwner) { target ->
             binding.minerTarget.text = target.substring(0, 10)
-        })
+        }
 
-        viewModel.TargetDiff.observe(viewLifecycleOwner, { target ->
+        viewModel.TargetDiff.observe(viewLifecycleOwner) { target ->
             binding.minerBest.text = target.substring(0, 15)
-        })
+        }
 
-        viewModel.MinerRealTimeSpeed.observe(viewLifecycleOwner, { speed ->
-            if(speed != 0 && viewModel.isMining){
+        viewModel.MinerRealTimeSpeed.observe(viewLifecycleOwner) { speed ->
+            if (speed != 0 && viewModel.isMining) {
                 binding.homeFragmentSpeedMeter.trembleDegree = 10F
                 binding.homeFragmentSpeedColor.trembleDegree = 10F
                 binding.homeFragmentSpeedMeter.speedTo(speed.toFloat(), 500)
                 binding.homeFragmentSpeedColor.speedTo(speed.toFloat(), 500)
-            }else{
+            } else {
                 binding.homeFragmentSpeedMeter.trembleDegree = 0F
                 binding.homeFragmentSpeedColor.trembleDegree = 0F
                 binding.homeFragmentSpeedMeter.speedTo(0F, 100)
                 binding.homeFragmentSpeedColor.speedTo(0F, 100)
             }
-        })
+        }
 
-        viewModel.SingleTestResult.observe(viewLifecycleOwner, { cpus ->
-            if(cpus != -1 && cpus < viewModel.CPUcores){
+        viewModel.SingleTestResult.observe(viewLifecycleOwner) { cpus ->
+            if (cpus != -1 && cpus < viewModel.CPUcores) {
                 binding.homeFragmentSpeedMeter.trembleDegree = 10F
                 binding.homeFragmentSpeedColor.trembleDegree = 10F
-                binding.homeFragmentSpeedMeter.speedTo(viewModel.MinerTestResults!![cpus].toFloat()+3000, 3000)
-                binding.homeFragmentSpeedColor.speedTo(viewModel.MinerTestResults!![cpus].toFloat()+3000, 3000)
+                binding.homeFragmentSpeedMeter.speedTo(
+                    viewModel.MinerTestResults!![cpus].toFloat() + 3000,
+                    3000
+                )
+                binding.homeFragmentSpeedColor.speedTo(
+                    viewModel.MinerTestResults!![cpus].toFloat() + 3000,
+                    3000
+                )
 
-                if(viewModel.isAutoTest){
+                if (viewModel.isAutoTest) {
                     val coreTest = layoutInflater.inflate(R.layout.autotest_row_speed, null, false)
                     val coreTestBinding = AutotestRowSpeedBinding.bind(coreTest)
-                    coreTestBinding.autotestRowCpus.text = (cpus+1).toString()
-                    coreTestBinding.autotestRowSpeed.text = viewModel.MinerTestResults!![cpus].toString()+" H/s"
+                    coreTestBinding.autotestRowCpus.text = (cpus + 1).toString()
+                    coreTestBinding.autotestRowSpeed.text =
+                        viewModel.MinerTestResults!![cpus].toString() + " H/s"
                     binding.homeFragmentAutotestResults.visibility = View.VISIBLE
                     binding.homeFragmentAutotestResults.addView(coreTest)
                 }
             }
-        })
+        }
 
-        viewModel.TestingStatus.observe(viewLifecycleOwner, { status ->
-            if(status){
+        viewModel.TestingStatus.observe(viewLifecycleOwner) { status ->
+            if (status) {
                 binding.homeFragmentCpuNumber.setOnClickListener(null)
                 binding.homeFragmentAutotest.setOnClickListener(null)
                 binding.homeFragmentTest.setOnClickListener(null)
 
                 binding.homeFragmentSpeedMeter.trembleDegree = 10F
                 binding.homeFragmentSpeedColor.trembleDegree = 10F
-                binding.homeFragmentSpeedMeter.speedTo(binding.homeFragmentCpuNumber.value*3000, 3000)
-                binding.homeFragmentSpeedColor.speedTo(binding.homeFragmentCpuNumber.value*3000, 3000)
-            }else{
+                binding.homeFragmentSpeedMeter.speedTo(
+                    binding.homeFragmentCpuNumber.value * 3000,
+                    3000
+                )
+                binding.homeFragmentSpeedColor.speedTo(
+                    binding.homeFragmentCpuNumber.value * 3000,
+                    3000
+                )
+            } else {
                 viewModel.MinerTestResults?.let { results ->
                     binding.homeFragmentSpeedMeter.trembleDegree = 0F
                     binding.homeFragmentSpeedColor.trembleDegree = 0F
-                    if(viewModel.SingleTestResult.value!! != -1){
-                        binding.homeFragmentSpeedMeter.speedTo(results[viewModel.SingleTestResult.value!!].toFloat(), 500)
-                        binding.homeFragmentSpeedColor.speedTo(results[viewModel.SingleTestResult.value!!].toFloat(), 500)
+                    if (viewModel.SingleTestResult.value!! != -1) {
+                        binding.homeFragmentSpeedMeter.speedTo(
+                            results[viewModel.SingleTestResult.value!!].toFloat(),
+                            500
+                        )
+                        binding.homeFragmentSpeedColor.speedTo(
+                            results[viewModel.SingleTestResult.value!!].toFloat(),
+                            500
+                        )
                     }
                 }
 
@@ -169,16 +193,14 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 binding.homeFragmentTestProgress.visibility = View.GONE
                 binding.homeFragmentAutotestProgress.visibility = View.GONE
             }
-        })
-
-
-
+        }
     }
 
     override fun onClick(v: View) {
         when(v.id){
             R.id.home_fragment_autotest -> {
                 viewModel.isAutoTest = true
+                binding.homeFragmentAutotestResults.removeAllViews()
                 binding.homeFragmentAutotest.visibility = View.GONE
                 binding.homeFragmentAutotestProgress.visibility = View.VISIBLE
                 viewModel.TestingStatus.value = true
@@ -220,7 +242,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
                 callback.onMinerStop()
             }
-
         }
     }
 

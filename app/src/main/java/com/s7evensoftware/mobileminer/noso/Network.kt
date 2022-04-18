@@ -134,13 +134,13 @@ class Network {
                 val response = bufferReader.readLine()
                 clientSocket.close()
 
+                Log.e("Network", "Pool: $response")
                 val poolInfo = response.split(" ")
 
                 if(poolInfo[0] == "OK"){
                     val poolData = PoolData()
                     poolData.Address = address
                     poolData.Port = port
-
                     poolData.MinerID = poolInfo[1]
                     poolData.NosoAddress = poolInfo[2]
                     poolData.TargetDiff = poolInfo[3]
@@ -148,23 +148,40 @@ class Network {
                     poolData.CurrentBlock = poolInfo[5].toLong()
                     poolData.PoolBalance = poolInfo[6].toLong()
                     poolData.PoolTilPayment = poolInfo[7].toInt()
-                    poolData.PoolPayStr = poolInfo[8]
+                    poolData.PoolPayStr = poolInfo[8].replace(":"," ",true)
+
+                    val poolPayStr = poolData.PoolPayStr.split(" ")
+
+                    val tempData = PoolPayData()
+                    if(poolPayStr.size > 1){
+                            tempData.Block = poolPayStr[0].toLong()
+                            tempData.Amount = poolPayStr[1].toLong()
+                            tempData.OrderID = poolPayStr[2]
+                    }
 
                     if(poolData.CurrentBlock > viewModel.LastBlock.value!!){
-                        Log.e("Network", "Poll Connection: $response")
+                        Log.e("Network", "Poll Connection Success")
                         poolData.Connected = true
                     }
 
-                    viewModel.currentPool =  poolData
+                    if(viewModel.lastPoolPayment.value!!.OrderID != tempData.OrderID){
+                        viewModel.OutPutInfo += "\n*** New Pool Payment ***"
+                        viewModel.lastPoolPayment.value = tempData
+                    }
+
+                    viewModel.currentPoolStatic = poolData
+                    viewModel.currentPool.postValue(poolData)
                     return poolData
                 }
 
                 return PoolData()
             }catch (t: SocketTimeoutException){
                 Log.e("mpNetwork","Connection to $address:$port TimedOut, retrying...")
+                viewModel.OutPutInfo += "\nConnection to $address:$port TimedOut, retrying..."
                 return PoolData()
             }catch (c: ConnectException){ // No internet ?
                 Log.e("mpNetwork","Connection error, check the internet, retrying...")
+                viewModel.OutPutInfo += "\nConnection error, check the internet, retrying..."
                 return PoolData()
             }catch (r: java.io.IOException){ // No internet ?
                 Log.e("mpNetwork","Reading error, malformed input? : ${r.message}")
@@ -180,8 +197,8 @@ class Network {
             viewModel: MainViewModel,
             retries: Int
         ):Boolean {
-            val serverAddress = InetSocketAddress(viewModel.currentPool.Address, viewModel.currentPool.Port)
-            Log.e("mpNetwork","Sending Share to ${viewModel.currentPool.Address}:${viewModel.currentPool.Port}")
+            val serverAddress = InetSocketAddress(viewModel.currentPoolStatic.Address, viewModel.currentPoolStatic.Port)
+            Log.e("mpNetwork","Sending Share to ${viewModel.currentPoolStatic.Address}:${viewModel.currentPoolStatic.Port}")
             try{
                 val clientSocket = Socket()
                 clientSocket.connect(serverAddress, NODE_TIMEOUT)
@@ -199,6 +216,7 @@ class Network {
                 val accepted = Result[0].toBoolean()
 
                 if(accepted){
+                    viewModel.acceptedShares.postValue(viewModel.acceptedShares.value?.inc())
                     Log.e("Network","Solution Sent was accepted")
                     viewModel.OutPutInfo += "\n\n################################"
                     viewModel.OutPutInfo += "\nSending Solution"

@@ -21,7 +21,7 @@
             android:layout_width="@dimen/main_noso_logo"
             android:layout_height="@dimen/main_noso_logo"
             android:adjustViewBounds="true"
-            />
+            android:src="@drawable/noso_coin"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -45,6 +45,58 @@
                 android:paddingHorizontal="11dp"
                 android:text="miner"
                 />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/main_top_pool_metrics"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:gravity="end">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorBlack"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/general_normal_text"
+                    android:text="Accepted\nShares"/>
+                <TextView
+                    android:id="@+id/main_top_pool_shares"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="@dimen/general_small_text"
+                    android:text="0"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/general_normal_margin"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorBlack"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/general_normal_text"
+                    android:text="Pool\nBalance"/>
+                <TextView
+                    android:id="@+id/main_top_pool_balance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/general_normal_text"
+                    android:textColor="@color/colorBlack"
+                    android:text="0.00000000"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
