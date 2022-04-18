@@ -16,40 +16,35 @@ jobs:
     steps:
       - name: Checkout master
         uses: actions/checkout@master
-
-      - uses: actions/setup-go@v2
-        with:
-          go-version: '1.17'
-
-      - name: Prepare Environment
-        working-directory: ./consominer-go
+          
+      - name: Install ECCLL
         run: |
-          go env -w GOOS=linux
-          go mod download
+          cd ./noso-2m-core
+          wget -q "http://ellcc.org/releases/latest/ellcc-x86_64-linux-2017-08-23.bz2" -O temp.bz2
+          bunzip2 temp.bz2
+          tar xf temp
+          cd ellcc
+          ./ellcc install
+          ./ellcc install libraries
+          cd ..
 
-      - name: Build Arm Binary
-        working-directory: ./consominer-go
-        run: |
-          go env -w GOARCH=arm
-          go build -o output/miner_arm .
-
-      - name: Build Arm64 Binary
-        working-directory: ./consominer-go
-        run: |
-          go env -w GOARCH=arm64
-          go build -o output/miner_arm64 .
+      - name: Build Arm64
+        run: ./ellcc/bin/ecc++ -target arm64v8-linux main.cpp md5-c.cpp -o miner_arm64 -std=c++17 -lpthread -O3 -static
+    
+      - name: Build Arm32
+        run: ./ellcc/bin/ecc++ -target arm32v7-linux main.cpp md5-c.cpp -o miner_arm32 -std=c++17 -lpthread -O3 -static
 
       - name: Save the Arm-Binary
         uses: actions/upload-artifact@v3
         with:
           name: Miner-Arm
-          path: consominer-go/output/miner_arm
+          path: noso-2m-core/miner_arm32
 
       - name: Save the Arm64-Binary
         uses: actions/upload-artifact@v3
         with:
           name: Miner-Arm64
-          path: consominer-go/output/miner_arm64
+          path: noso-2m-core/miner_arm64
 
   build:
     name: Build Release version
