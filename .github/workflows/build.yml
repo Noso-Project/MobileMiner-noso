@@ -28,9 +28,12 @@ jobs:
           ./ellcc install
           ./ellcc install libraries
           cd ..
+          ls
 
       - name: Build Arm64
-        run: ./ellcc/bin/ecc++ -target arm64v8-linux main.cpp md5-c.cpp -o miner_arm64 -std=c++17 -lpthread -O3 -static
+        run: |
+          ls
+          ./ellcc/bin/ecc++ -target arm64v8-linux main.cpp md5-c.cpp -o miner_arm64 -std=c++17 -lpthread -O3 -static
     
       - name: Build Arm32
         run: ./ellcc/bin/ecc++ -target arm32v7-linux main.cpp md5-c.cpp -o miner_arm32 -std=c++17 -lpthread -O3 -static
