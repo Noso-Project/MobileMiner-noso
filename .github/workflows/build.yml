@@ -20,9 +20,10 @@ jobs:
       - name: Install ECCLL
         run: |
           cd ./noso-2m-core
-          wget -q "http://ellcc.org/releases/latest/ellcc-x86_64-linux-2017-08-23.bz2" -O temp.bz2
-          bunzip2 temp.bz2
-          tar xf temp
+          ls
+          wget -q "http://ellcc.org/releases/latest/ellcc-x86_64-linux-2017-08-23.bz2" -O ./temp.bz2
+          bunzip2 ./temp.bz2
+          tar xf ./temp
           cd ellcc
           ./ellcc install
           ./ellcc install libraries
