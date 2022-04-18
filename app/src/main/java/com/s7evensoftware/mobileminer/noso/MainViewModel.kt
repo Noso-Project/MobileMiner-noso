@@ -9,8 +9,11 @@ class MainViewModel: ViewModel() {
 
     // Pool Variables
     var isFirstRun = true
-    var currentPool = PoolData()
+    var currentPool = MutableLiveData(PoolData())
+    var currentPoolStatic = PoolData()
     var poolString = MutableLiveData(DEFAULT_POOL_STRING)
+    var lastPoolPayment = MutableLiveData(PoolPayData())
+    var acceptedShares = MutableLiveData(0L)
 
     var LastNodeSelected:NodeInfo? = null
 

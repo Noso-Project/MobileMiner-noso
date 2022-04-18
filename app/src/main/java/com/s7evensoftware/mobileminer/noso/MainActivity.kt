@@ -120,6 +120,26 @@ class MainActivity :
         setContentView(binding.root)
     }
 
+//    override fun onPause() {
+//        super.onPause()
+//        viewModel.blockAgeTimerJob?.cancel()
+//        viewModel.speedReportJob?.cancel()
+//        viewModel.blockAgeTimerJob = null
+//        viewModel.speedReportJob = null
+//        Log.e("Main","Paused...")
+//    }
+//
+//    override fun onResume() {
+//        super.onResume()
+//        if(viewModel.blockAgeTimerJob == null){
+//
+//            viewModel
+//        }
+//        viewModel.blockAgeTimerJob?.cancel()
+//        viewModel.speedReportJob?.cancel()
+//        Log.e("Main","Resumed...")
+//    }
+
     private fun RestoreSettings(){
         val sharedPref = getPreferences(Context.MODE_PRIVATE)
         viewModel.MinerAddress.value = sharedPref.getString(SHAREDPREF_ADDRESS, DEFAULT_ADDRESS)
@@ -182,23 +202,23 @@ class MainActivity :
                         }
                     }else{
                         var newBlock = false
-                        if (viewModel.currentPool.CurrentBlock > viewModel.LastBlock.value ?: 0) {
+                        if (viewModel.currentPoolStatic.CurrentBlock > viewModel.LastBlock.value ?: 0) {
                             newBlock = true
-                            viewModel.TargetHash.postValue(viewModel.currentPool.TargetHash)
-                            viewModel.TargetDiff.postValue(viewModel.currentPool.TargetDiff)
-                            viewModel.LastBlock.postValue(viewModel.currentPool.CurrentBlock)
+                            viewModel.TargetHash.postValue(viewModel.currentPoolStatic.TargetHash)
+                            viewModel.TargetDiff.postValue(viewModel.currentPoolStatic.TargetDiff)
+                            viewModel.LastBlock.postValue(viewModel.currentPoolStatic.CurrentBlock)
 
                             Log.e("Main","Sync Completed:")
-                            Log.e("Main","TargetHash:${viewModel.currentPool.TargetHash}")
-                            Log.e("Main","TargetDiff:${viewModel.currentPool.TargetDiff}")
-                            Log.e("Main","LastBlock: ${viewModel.currentPool.CurrentBlock}")
+                            Log.e("Main","TargetHash:${viewModel.currentPoolStatic.TargetHash}")
+                            Log.e("Main","TargetDiff:${viewModel.currentPoolStatic.TargetDiff}")
+                            Log.e("Main","LastBlock: ${viewModel.currentPoolStatic.CurrentBlock}")
 
                             //sendCommand("$UPDATE_BLOCK_COMMAND ${viewModel.currentPool.TargetHash} ${viewModel.currentPool.TargetDiff}")
                         }
 
-                        if (viewModel.currentPool.TargetDiff < viewModel.TargetDiff.value!!) {
-                            viewModel.TargetDiff.postValue(viewModel.currentPool.TargetDiff)
-                            viewModel.TargetDiffStatic = viewModel.currentPool.TargetDiff
+                        if (viewModel.currentPoolStatic.TargetDiff < viewModel.TargetDiff.value!!) {
+                            viewModel.TargetDiff.postValue(viewModel.currentPoolStatic.TargetDiff)
+                            viewModel.TargetDiffStatic = viewModel.currentPoolStatic.TargetDiff
                         }
 
                         if(newBlock){
@@ -206,14 +226,14 @@ class MainActivity :
                             startBlockCounter()
                         }
 
-                        viewModel.OutPutInfo += "# Block: ${viewModel.currentPool.CurrentBlock} \n# Age: ${viewModel.BlockAge.value} secs \n# Hash: ${viewModel.currentPool.TargetHash}\n" +
-                                "# TDiff: ${viewModel.currentPool.TargetDiff}\n"
+                        viewModel.OutPutInfo += "# Block: ${viewModel.currentPoolStatic.CurrentBlock} \n# Age: ${viewModel.BlockAge.value} secs \n# Hash: ${viewModel.currentPoolStatic.TargetHash}\n" +
+                                "# TDiff: ${viewModel.currentPoolStatic.TargetDiff}\n"
                         viewModel.OutPutInfo += "#####################################\n"
 
                         if (viewModel.pendingMinerStart) {
                             viewModel.isMining = true
                             viewModel.pendingMinerStart = false
-                            sendCommand("$MINE_POOL_COMMAND ${viewModel.getCPUtoUse()} ${viewModel.currentPool.MinerID} ${viewModel.currentPool.NosoAddress} ${viewModel.currentPool.TargetHash} ${viewModel.currentPool.TargetDiff}")
+                            sendCommand("$MINE_POOL_COMMAND ${viewModel.getCPUtoUse()} ${viewModel.currentPoolStatic.MinerID} ${viewModel.currentPoolStatic.NosoAddress} ${viewModel.currentPoolStatic.TargetHash} ${viewModel.currentPoolStatic.TargetDiff}")
                             speedReportTask()
                         }
 
@@ -243,6 +263,14 @@ class MainActivity :
 
         viewModel.TargetDiff.observe(this) { newTarget ->
             sendCommand("$UPDATE_TARGET_COMMAND $newTarget")
+        }
+
+        viewModel.acceptedShares.observe(this) { accepted ->
+            binding.mainTopPoolShares.text = "$accepted"
+        }
+
+        viewModel.currentPool.observe(this) { pool ->
+            binding.mainTopPoolBalance.text = Nosocoreunit.Long2Currency(pool.PoolBalance)
         }
 
         //Set primary fragment
@@ -334,7 +362,7 @@ class MainActivity :
                     val reader = BufferedReader(InputStreamReader(miner.inputStream))
                     var line: String
                     while (reader.readLine().also { line = it } != null) {
-                        Log.e("Main", "$line")
+                        //Log.e("Main", "$line")
                         parseLine(line)
                     }
                 }
@@ -367,7 +395,6 @@ class MainActivity :
                     poolData = Network.getPoolData(poolinfo[0], Integer.parseInt(poolinfo[1]), viewModel)
                 }
             }
-
             viewModel.MinerSynced.postValue(MINER_SYNC_DONE)
         }
     }
@@ -458,6 +485,9 @@ class MainActivity :
 
     override fun onMinerStart() {
         Log.e("Main","Start Miner Called")
+        homeFragment.hideAutoTestResult()
+        viewModel.acceptedShares.value = 0
+        if(viewModel.isSoloMining.value == false) binding.mainTopPoolMetrics.visibility = View.VISIBLE
         SyncMiner()
         viewModel.pendingMinerStart = true
     }
@@ -467,6 +497,7 @@ class MainActivity :
         viewModel.LastBlock.value = 0
         viewModel.MinerRealTimeSpeed.value = 0
         viewModel.OutPutInfo += "\nStopping Miner and Miner process"
+        binding.mainTopPoolMetrics.visibility = View.GONE
         coroutineContext.cancelChildren()
         StartMiner()
     }

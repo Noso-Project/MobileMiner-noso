@@ -4,10 +4,20 @@ import android.util.Log
 import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.math.abs
+import kotlin.math.absoluteValue
 
 class Nosocoreunit {
 
     companion object {
+
+        fun Long2Currency(balance:Long):String{
+            var balanceStr = (balance.absoluteValue).toString()
+            while(balanceStr.length < 9){
+                balanceStr = "0$balanceStr"
+            }
+            val result = balanceStr.substring(0, balanceStr.length-8) + "." + balanceStr.substring(balanceStr.length-8)
+            return if(balance >= 0) result else "-$result"
+        }
 
         fun CheckSource(viewModel: MainViewModel):Boolean {
             var reachedNodes:ArrayList<NodeInfo>

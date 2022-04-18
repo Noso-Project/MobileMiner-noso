@@ -22,6 +22,12 @@ class PoolData {
     var PoolPayStr:String = ""
 }
 
+class PoolPayData{
+    var Block = 0L
+    var Amount = 0L
+    var OrderID = ""
+}
+
 class ConcensusResult {
     var Address:String = ""
     var Port:Int = 8080
