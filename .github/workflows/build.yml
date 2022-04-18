@@ -21,9 +21,9 @@ jobs:
         run: |
           cd ./noso-2m-core
           ls
-          wget -q "http://ellcc.org/releases/latest/ellcc-x86_64-linux-2017-08-23.bz2" -O ./temp.bz2
-          bunzip2 ./temp.bz2
-          tar xf ./temp
+          wget -q "http://ellcc.org/releases/latest/ellcc-x86_64-linux-2017-08-23.bz2" -O temp.bz2
+          bunzip2 temp.bz2
+          tar xf temp
           cd ellcc
           ./ellcc install
           ./ellcc install libraries
@@ -32,11 +32,13 @@ jobs:
 
       - name: Build Arm64
         run: |
-          ls
+          cd ./noso-2m-core
           ./ellcc/bin/ecc++ -target arm64v8-linux main.cpp md5-c.cpp -o miner_arm64 -std=c++17 -lpthread -O3 -static
     
       - name: Build Arm32
-        run: ./ellcc/bin/ecc++ -target arm32v7-linux main.cpp md5-c.cpp -o miner_arm32 -std=c++17 -lpthread -O3 -static
+        run: |
+          cd ./noso-2m-core
+          ./ellcc/bin/ecc++ -target arm32v7-linux main.cpp md5-c.cpp -o miner_arm32 -std=c++17 -lpthread -O3 -static
 
       - name: Save the Arm-Binary
         uses: actions/upload-artifact@v3
