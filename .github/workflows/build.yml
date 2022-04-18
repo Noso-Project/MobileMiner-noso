@@ -11,7 +11,7 @@ on:
 
 jobs:
   buildcore:
-    name: Build Go Miner Binary
+    name: Build Miner-Core
     runs-on: ubuntu-latest
     steps:
       - name: Checkout master
@@ -20,15 +20,12 @@ jobs:
       - name: Install ECCLL
         run: |
           cd ./noso-2m-core
-          ls
           wget -q "http://ellcc.org/releases/latest/ellcc-x86_64-linux-2017-08-23.bz2" -O temp.bz2
           bunzip2 temp.bz2
           tar xf temp
           cd ellcc
           ./ellcc install
           ./ellcc install libraries
-          cd ..
-          ls
 
       - name: Build Arm64
         run: |
