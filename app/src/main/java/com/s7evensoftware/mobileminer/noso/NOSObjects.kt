@@ -14,9 +14,10 @@ class PoolData {
     var MinerID:String = ""
     var NosoAddress:String = ""
     var Connected:Boolean = false
+    var Invalid: Boolean = false
     var CurrentBlock:Long = 0
-    var TargetHash:String = ""
-    var TargetDiff:String = ""
+    var TargetHash:String = MaxDiff
+    var TargetDiff:String = MaxDiff
     var PoolBalance:Long = 0L
     var PoolTilPayment:Int = 30
     var PoolPayStr:String = ""

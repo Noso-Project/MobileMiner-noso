@@ -51,7 +51,7 @@ class SettingsFragment : Fragment(), View.OnClickListener {
         binding.settingsFragmentMinerID.value = viewModel.MinerID
         binding.settingsFragmentMode.setOnClickListener(this)
 
-        binding.settingsFragmentVersion.text = "v${requireContext().packageManager.getPackageInfo(requireContext().packageName, 0).versionName}"
+        binding.settingsFragmentVersion.text = viewModel.appVersion
 
         binding.settingsFragmentCpuSlider.addOnChangeListener { _, value, _ ->
             binding.settingsFragmentCpuNumber.text = value.toInt().toString()

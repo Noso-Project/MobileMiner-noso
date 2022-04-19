@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.Job
 
 class MainViewModel: ViewModel() {
+    // App version
+    var appVersion = "v1.0.0"
 
     // Pool Variables
     var isFirstRun = true

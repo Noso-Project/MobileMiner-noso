@@ -1,8 +1,5 @@
-## Version 1.0.6
-- Pool string is now properly saved
-- Changed log structure to properly reflect accepted/rejected shares for pool mining and accepted/rejected solutions for solo mining
-- Payment notification fixed, now it won't crash after a pool payment
-- Now the application won't crash even if the phone has an unsupported architecture but will show in the log what arch is about
-- Now the app version is shown in the settings screen (left bottom corner)
-- Some typos fixed
-- More code cleanup
+## Version 1.0.7
+- Now the reason for rejected shares is shown in log
+- Added block number and miner identifier (**MMvX.X.X**) to the shares and pool connection
+- Now the app will stop trying to connect to the pool in case of invalid connection and will report it to the log
+- Miner sync time delayed 6 seconds (606 sec in total per block) in order to prevent unneeded connections to pool

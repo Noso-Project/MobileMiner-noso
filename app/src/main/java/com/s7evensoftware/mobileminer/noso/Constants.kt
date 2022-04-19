@@ -1,9 +1,10 @@
 package com.s7evensoftware.mobileminer.noso
 
+const val MINER_IDENTIFIER = "MM" // Identifier to use when sending shares MM stands for MobileMiner
 const val SOURCE = "mainnet"
 const val DEFAULT_ADDRESS = "NHsx5MnV7UrNubBshnhpSnBuwKaqGw"
 const val DEFAULT_CPUS = 1
-const val DEFAULT_MINING_MODE = true // true = solo mining // false = pool mining
+const val DEFAULT_MINING_MODE = false // true = solo mining // false = pool mining
 const val NOSPath             = "NOSODATA" // directory
 const val LogsDirectory       = "LOGS" // directory
 const val LogsFilename        = "error_log.txt" // directory
@@ -24,7 +25,8 @@ const val HOME_FRAGMENT = "homeFragment"
 const val LOGS_FRAGMENT = "logsFragment"
 const val SETTINGS_FRAGMENT = "settingsFragment"
 const val DEFAULT_RETRY = 5
-const val BLOCK_DEFAULT_TIME = 600
+const val BLOCK_DEFAULT_TIME = 600L
+const val POOL_BLOCK_DEFAULT_TIME = 606L
 
 // Miner Constants
 const val MINER_SYNC_PENDING = -1

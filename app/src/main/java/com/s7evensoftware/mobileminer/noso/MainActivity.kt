@@ -114,6 +114,7 @@ class MainActivity :
         CreateDefaultSeedNodes()
         //Start view model for whole app
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        viewModel.appVersion = "v${packageManager.getPackageInfo(packageName, 0).versionName}"
         binding = ActivityMainBinding.inflate(layoutInflater)
 
         // Restore Settings
@@ -254,10 +255,17 @@ class MainActivity :
         }
 
         viewModel.BlockAge.observe(this) { currentAge ->
-            if (currentAge == (BLOCK_DEFAULT_TIME - 1).toLong()) {
-                viewModel.MinerSynced.value = MINER_BLOCK_CHANGE
-                minerSoftStop()
-                SyncMiner()
+            if(viewModel.isSoloMining.value == true){
+                if (currentAge == (BLOCK_DEFAULT_TIME - 1)) {
+                    minerSoftStop()
+                    SyncMiner()
+                }
+            }else{
+                if(currentAge == BLOCK_DEFAULT_TIME) viewModel.MinerSynced.value = MINER_BLOCK_CHANGE
+                if (currentAge == POOL_BLOCK_DEFAULT_TIME) {
+                    minerSoftStop()
+                    SyncMiner()
+                }
             }
         }
 
@@ -306,7 +314,7 @@ class MainActivity :
             viewModel.blockAgeTimerJob?.cancel()
         }
         viewModel.blockAgeTimerJob = launch {
-            while(viewModel.BlockAge.value!! < BLOCK_DEFAULT_TIME){
+            while(viewModel.BlockAge.value!! < if(viewModel.isSoloMining.value == true){ BLOCK_DEFAULT_TIME }else{ POOL_BLOCK_DEFAULT_TIME } ){
                 delay(1000)
                 viewModel.BlockAge.postValue(viewModel.BlockAge.value!!.inc())
             }
@@ -418,12 +426,12 @@ class MainActivity :
             }else{
                 var poolinfo = viewModel.poolString.value?.split(":")
                 var poolData = Network.getPoolData(poolinfo!![0], Integer.parseInt(poolinfo[1]), viewModel)
-                while(!poolData.Connected){
-                    delay(4000)
+                while(!poolData.Connected && !poolData.Invalid){
+                    delay(1000)
                     poolData = Network.getPoolData(poolinfo[0], Integer.parseInt(poolinfo[1]), viewModel)
                 }
             }
-            viewModel.MinerSynced.postValue(MINER_SYNC_DONE)
+            if(!viewModel.currentPoolStatic.Invalid) viewModel.MinerSynced.postValue(MINER_SYNC_DONE)
         }
     }
 

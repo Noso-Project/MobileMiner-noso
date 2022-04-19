@@ -87,7 +87,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
         viewModel.BlockAge.observe(viewLifecycleOwner) { age ->
             if (age <= 600) {
-                binding.minerBlockAge.text = "$age seg"
+                binding.minerBlockAge.text = "$age sec"
             }
         }
 

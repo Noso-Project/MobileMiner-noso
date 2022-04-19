@@ -25,7 +25,7 @@ class Network {
             return NODEarray
         }
 
-        fun Concensus(NODEarray:ArrayList<NodeInfo>, viewModel:MainViewModel):ConcensusResult? {
+        fun Concensus(NODEarray:ArrayList<NodeInfo>, viewModel:MainViewModel): ConcensusResult {
             var result = ConcensusResult()
             var selectedNode: NodeInfo?
             var ArrT:ArrayList<ConcensusData>
@@ -126,7 +126,7 @@ class Network {
                 val bufferReader = BufferedReader(inputStreamReader)
 
                 clientChannel.println(
-                    "SOURCE ${viewModel.MinerAddress.value}")
+                    "SOURCE ${viewModel.MinerAddress.value} $MINER_IDENTIFIER${viewModel.appVersion}")
                 val response = bufferReader.readLine()
                 clientSocket.close()
 
@@ -168,9 +168,15 @@ class Network {
                     viewModel.currentPoolStatic = poolData
                     viewModel.currentPool.postValue(poolData)
                     return poolData
-                }
+                }else{
+                    val poolData = PoolData()
+                    poolData.Invalid = true
+                    viewModel.currentPoolStatic = poolData
 
-                return PoolData()
+                    viewModel.OutPutInfo += "\nPool Response: ${poolInfo[0]}\n"
+                    Log.e("Network", "Pool Response: ${poolInfo[0]}")
+                    return poolData
+                }
             }catch (t: SocketTimeoutException){
                 Log.e("mpNetwork","Connection to $address:$port TimedOut, retrying...")
                 viewModel.OutPutInfo += "\nConnection to $address:$port TimedOut, retrying..."
@@ -203,7 +209,7 @@ class Network {
                 val bufferReader = BufferedReader(inputStreamReader)
 
                 clientChannel.println(
-                    "SHARE ${viewModel.MinerAddress.value} ${solution.Hash}")
+                    "SHARE ${viewModel.MinerAddress.value} ${solution.Hash} $MINER_IDENTIFIER${viewModel.appVersion} ${viewModel.LastBlock.value}")
                 val response = bufferReader.readLine()
                 clientSocket.close()
 
@@ -230,6 +236,7 @@ class Network {
                     viewModel.OutPutInfo += "\n\nRejected Share"
                     viewModel.OutPutInfo += "\nHash: ${solution.Hash}"
                     viewModel.OutPutInfo += "\nDiff: ${solution.Diff}"
+                    viewModel.OutPutInfo += "\n$response"
                 }
                 viewModel.TriggerOutputUpdate.postValue(viewModel.OutPutInfo.length)
                 return accepted
