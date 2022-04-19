@@ -98,7 +98,7 @@
                                 android:layout_marginLeft="@dimen/general_small_margin"
                                 android:textSize="@dimen/general_normal_text"
                                 android:textColor="@color/colorChatBlack"
-                                android:text="Number of Cores to use: "/>
+                                android:text="Number of cores to use: "/>
                         </LinearLayout>
                         <com.google.android.material.slider.Slider
                             android:id="@+id/home_fragment_cpu_number"
@@ -157,7 +157,7 @@
                             android:textAlignment="center"
                             android:textColor="@color/colorBlack"
                             android:textStyle="bold"
-                            android:text="Start Minning"/>
+                            android:text="Start Mining"/>
                         <ImageButton
                             android:id="@+id/home_fragment_start_miner"
                             android:layout_width="@dimen/minning_button_size"

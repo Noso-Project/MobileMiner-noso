@@ -6,7 +6,6 @@ import java.net.ConnectException
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
@@ -105,7 +104,7 @@ class Network {
 
                 return stringToNodeInfo(response, address, port)
             }catch (t: SocketTimeoutException){
-                Log.e("mpNetwork","Request to $address -> Timed Out")
+                Log.e("mpNetwork","Request to $address:$port -> Timed Out")
             }catch (c: ConnectException){ // No internet ?
                 Log.e("mpNetwork","Connection error, check the internet")
             }catch (r: java.io.IOException){ // No internet ?
@@ -161,9 +160,9 @@ class Network {
                         poolData.Connected = true
                     }
 
-                    if(viewModel.lastPoolPayment.value!!.OrderID != tempData.OrderID){
+                    if(viewModel.lastPoolPayment.OrderID != tempData.OrderID){
                         viewModel.OutPutInfo += "\n*** New Pool Payment ***"
-                        viewModel.lastPoolPayment.value = tempData
+                        viewModel.lastPoolPayment = tempData
                     }
 
                     viewModel.currentPoolStatic = poolData
@@ -208,19 +207,17 @@ class Network {
                 val response = bufferReader.readLine()
                 clientSocket.close()
 
-                Log.e("Network", "Solution Response(Share): $response")
+                Log.e("Network", "Share Response(Share): $response")
                 val Result = response.split(" ")
                 val accepted = Result[0].toBoolean()
 
                 if(accepted){
                     viewModel.acceptedShares.postValue(viewModel.acceptedShares.value?.inc())
-                    Log.e("Network","Solution Sent was accepted")
+                    Log.e("Network","Share Sent was accepted")
                     viewModel.OutPutInfo += "\n\n################################"
-                    viewModel.OutPutInfo += "\nSending Solution"
-                    viewModel.OutPutInfo += "\nTarget: ${solution.Target}"
+                    viewModel.OutPutInfo += "\nAccepted Share"
                     viewModel.OutPutInfo += "\nHash: ${solution.Hash}"
                     viewModel.OutPutInfo += "\nDiff: ${solution.Diff}"
-                    viewModel.OutPutInfo += "\n!!Solution Sent Was Accepted!!"
                     viewModel.OutPutInfo += "\n################################\n"
                 }else{
                     // Update Target Diff
@@ -229,12 +226,10 @@ class Network {
                         viewModel.TargetDiff.postValue(Result[1])
                     }
 
-                    Log.e("Network","Solution Sent Rejected")
-                    viewModel.OutPutInfo += "\n\nSending Solution"
-                    viewModel.OutPutInfo += "\nTarget: ${solution.Target}"
+                    Log.e("Network","Share Sent Rejected")
+                    viewModel.OutPutInfo += "\n\nRejected Share"
                     viewModel.OutPutInfo += "\nHash: ${solution.Hash}"
                     viewModel.OutPutInfo += "\nDiff: ${solution.Diff}"
-                    viewModel.OutPutInfo += "\nSolution Sent Was Rejected\n"
                 }
                 viewModel.TriggerOutputUpdate.postValue(viewModel.OutPutInfo.length)
                 return accepted
@@ -399,28 +394,6 @@ class Network {
                 ThisItem.Count = 1
                 ArrT.add(ThisItem)
             }
-        }
-
-        fun getDateFromUNIX(time:Long):String{
-            try {
-                val formatter = SimpleDateFormat("dd/MM/yyyy")
-                formatter.timeZone = TimeZone.getTimeZone("UTC")
-                return formatter.format(time)
-            }catch (e:Exception){
-                Log.e("mpFunctions","Error parsing date")
-            }
-            return "00/00/0000"
-        }
-
-        fun getTimeFromUNIX(time:Long):String{
-            try {
-                val formatter = SimpleDateFormat("HH:mm:ss")
-                formatter.timeZone = TimeZone.getTimeZone("UTC")
-                return formatter.format(time)
-            }catch (e:Exception){
-                Log.e("mpFunctions","Error parsing date")
-            }
-            return "00:00:00"
         }
     }
 }

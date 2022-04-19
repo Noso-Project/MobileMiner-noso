@@ -11,12 +11,13 @@ class MainViewModel: ViewModel() {
     var currentPool = MutableLiveData(PoolData())
     var currentPoolStatic = PoolData()
     var poolString = MutableLiveData(DEFAULT_POOL_STRING)
-    var lastPoolPayment = MutableLiveData(PoolPayData())
+    var lastPoolPayment = PoolPayData()
     var acceptedShares = MutableLiveData(0L)
 
     var LastNodeSelected:NodeInfo? = null
 
     // General and Settings Values
+    var isSupported = false
     var MinerAddress = MutableLiveData(DEFAULT_ADDRESS)
     var CPUtoUse = MutableLiveData(1)
     var isSoloMining = MutableLiveData(true)

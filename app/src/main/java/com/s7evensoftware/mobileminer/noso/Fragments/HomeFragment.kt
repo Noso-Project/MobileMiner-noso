@@ -197,48 +197,56 @@ class HomeFragment : Fragment(), View.OnClickListener {
     override fun onClick(v: View) {
         when(v.id){
             R.id.home_fragment_autotest -> {
-                viewModel.isAutoTest = true
-                binding.homeFragmentAutotestResults.removeAllViews()
-                binding.homeFragmentAutotest.visibility = View.GONE
-                binding.homeFragmentAutotestProgress.visibility = View.VISIBLE
-                viewModel.TestingStatus.value = true
-                callback.onAutoTesttrigger()
+                if(viewModel.isSupported){
+                    viewModel.isAutoTest = true
+                    binding.homeFragmentAutotestResults.removeAllViews()
+                    binding.homeFragmentAutotest.visibility = View.GONE
+                    binding.homeFragmentAutotestProgress.visibility = View.VISIBLE
+                    viewModel.TestingStatus.value = true
+                    callback.onAutoTesttrigger()
+                }
             }
             R.id.home_fragment_test -> {
-                viewModel.isAutoTest = false
-                binding.homeFragmentAutotestResults.removeAllViews()
-                binding.homeFragmentAutotestResults.visibility = View.GONE
+                if(viewModel.isSupported){
+                    viewModel.isAutoTest = false
+                    binding.homeFragmentAutotestResults.removeAllViews()
+                    binding.homeFragmentAutotestResults.visibility = View.GONE
 
-                binding.homeFragmentTest.visibility = View.GONE
-                binding.homeFragmentTestProgress.visibility = View.VISIBLE
-                viewModel.TestingStatus.value = true
-                callback.onTesttrigger(binding.homeFragmentCpuNumber.value.toInt())
+                    binding.homeFragmentTest.visibility = View.GONE
+                    binding.homeFragmentTestProgress.visibility = View.VISIBLE
+                    viewModel.TestingStatus.value = true
+                    callback.onTesttrigger(binding.homeFragmentCpuNumber.value.toInt())
+                }
             }
             R.id.home_fragment_start_miner -> {
-                viewModel.isMinerStarted = true
+                if(viewModel.isSupported){
+                    viewModel.isMinerStarted = true
 
-                binding.homeFragmentTester.visibility = View.GONE
-                binding.homeFragmentLauncher.visibility = View.GONE
+                    binding.homeFragmentTester.visibility = View.GONE
+                    binding.homeFragmentLauncher.visibility = View.GONE
 
-                binding.minerContainer1.visibility = View.VISIBLE
-                binding.minerContainer2.visibility = View.VISIBLE
-                binding.minerContainer3.visibility = View.VISIBLE
+                    binding.minerContainer1.visibility = View.VISIBLE
+                    binding.minerContainer2.visibility = View.VISIBLE
+                    binding.minerContainer3.visibility = View.VISIBLE
 
-                binding.minerFocusTrick.requestFocus()
+                    binding.minerFocusTrick.requestFocus()
 
-                callback.onMinerStart()
+                    callback.onMinerStart()
+                }
             }
             R.id.miner_stop -> {
-                viewModel.isMinerStarted = false
+                if(viewModel.isSupported) {
+                    viewModel.isMinerStarted = false
 
-                binding.minerContainer1.visibility = View.GONE
-                binding.minerContainer2.visibility = View.GONE
-                binding.minerContainer3.visibility = View.GONE
+                    binding.minerContainer1.visibility = View.GONE
+                    binding.minerContainer2.visibility = View.GONE
+                    binding.minerContainer3.visibility = View.GONE
 
-                binding.homeFragmentTester.visibility = View.VISIBLE
-                binding.homeFragmentLauncher.visibility = View.VISIBLE
+                    binding.homeFragmentTester.visibility = View.VISIBLE
+                    binding.homeFragmentLauncher.visibility = View.VISIBLE
 
-                callback.onMinerStop()
+                    callback.onMinerStop()
+                }
             }
         }
     }

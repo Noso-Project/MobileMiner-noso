@@ -36,6 +36,14 @@ const val MINER_PROCESS_ON = 1
 const val MINER_PROCESS_OFF = 2
 const val MINER_PROCESS_KILLED = 3
 
+const val ARCH_ARM32 = "arm32"
+const val ARCH_ARM64 = "arm64"
+const val ARCH_ARMEABI = "armeabi"
+const val ARCH_UNDEFINED = "undefined"
+
+const val MINER_32 = "miner_arm32"
+const val MINER_64 = "miner_arm64"
+
 // Miner Commands
 const val PROCESS_START = "MINERBINSTART"
 const val PROCESS_END = "MINERBINSTOP"

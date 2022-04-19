@@ -228,11 +228,21 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="right">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:id="@+id/settings_fragment_version"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/general_normal_padding"
+                    android:textColor="@color/colorChatBlack"
+                    android:layout_weight="1"
+                    android:text="v1.0.0"/>
                 <Button
                     android:id="@+id/settings_fragment_save"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="right"
                     android:text="Apply"/>
             </LinearLayout>
 

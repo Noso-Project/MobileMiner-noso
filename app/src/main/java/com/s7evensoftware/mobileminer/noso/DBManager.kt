@@ -38,13 +38,13 @@ object DBManager {
             val node6 = ServerObject()
             val node7 = ServerObject()
 
-            node1.Address = "192.210.226.118"
+            node1.Address = "109.230.238.240"
             node2.Address = "45.146.252.103"
             node3.Address = "194.156.88.117"
-            node4.Address = "107.172.5.8"
-            node5.Address = "172.245.52.208"
-            node6.Address = "109.230.238.240"
-            node7.Address = "23.94.21.83"
+            node4.Address = "23.94.21.83"
+            node5.Address = "107.175.59.177"
+            node6.Address = "107.172.193.176"
+            node7.Address = "107.175.194.151"
 
             realmDB.executeTransaction {
                 // Clear List

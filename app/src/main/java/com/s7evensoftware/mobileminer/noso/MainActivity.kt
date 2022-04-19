@@ -351,39 +351,61 @@ class MainActivity :
         }
 
         // Create Process Builder for miner depending on arch
-        val args = arrayOf("./miner_$cpuArch")
-        val minerProcessBuilder = ProcessBuilder(*args)
-        minerProcessBuilder.directory(File(privatePath))
-        minerProcessBuilder.redirectErrorStream()
-        minerProcess = minerProcessBuilder.start() // Start Process
-        viewModel.MinerProcessStatus = MINER_PROCESS_ON
-
-        viewModel.OutPutInfo += "\nMiner Process Started - OK"
-        Log.e("Main","Miner Process Started - OK")
-
-        // Permanent Task to Read Process Output
-        launch {
-            try {
-                minerProcess?.let { miner ->
-                    val reader = BufferedReader(InputStreamReader(miner.inputStream))
-                    var line: String
-                    while (reader.readLine().also { line = it } != null) {
-                        //Log.e("Main", "$line")
-                        parseLine(line)
-                    }
-                }
-            } catch (i: InterruptedIOException){
-                viewModel.OutPutInfo += "\n# Miner process reader got closed"
-                Log.e("Main", "Error reading process input: $i")
-            } catch (e: IOException) {
-                viewModel.OutPutInfo += "\n# Error reading process input: $e"
-                Log.e("Main", "Error reading process input: $e")
-            }catch (n: NullPointerException){
-                viewModel.OutPutInfo += "\nProcess was killed"
-                Log.e("Main", "Process was killed")
-                viewModel.MinerProcessStatus = MINER_PROCESS_KILLED
+        var minerRunnableName = ARCH_UNDEFINED
+        when(cpuArch){
+            ARCH_ARM32, ARCH_ARMEABI -> {
+                viewModel.isSupported = true
+                minerRunnableName = MINER_32
+            }
+            ARCH_ARM64 -> {
+                viewModel.isSupported = true
+                minerRunnableName = MINER_64
             }
         }
+
+        if(viewModel.isSupported){
+            val args = arrayOf("./$minerRunnableName")
+            val minerProcessBuilder = ProcessBuilder(*args)
+            minerProcessBuilder.directory(File(privatePath))
+            minerProcessBuilder.redirectErrorStream()
+            minerProcess = minerProcessBuilder.start() // Start Process
+            viewModel.MinerProcessStatus = MINER_PROCESS_ON
+
+            viewModel.OutPutInfo += "\nMiner Process Started - OK"
+            Log.e("Main","Miner Process Started - OK")
+
+            // Permanent Task to Read Process Output
+            launch {
+                try {
+                    minerProcess?.let { miner ->
+                        val reader = BufferedReader(InputStreamReader(miner.inputStream))
+                        var line: String
+                        while (reader.readLine().also { line = it } != null) {
+                            //Log.e("Main", "$line")
+                            parseLine(line)
+                        }
+                    }
+                } catch (i: InterruptedIOException){
+                    viewModel.OutPutInfo += "\n# Miner process reader got closed"
+                    Log.e("Main", "Error reading process input: $i")
+                } catch (e: IOException) {
+                    viewModel.OutPutInfo += "\n# Error reading process input: $e"
+                    Log.e("Main", "Error reading process input: $e")
+                }catch (n: NullPointerException){
+                    viewModel.OutPutInfo += "\nProcess was killed"
+                    Log.e("Main", "Process was killed")
+                    viewModel.MinerProcessStatus = MINER_PROCESS_KILLED
+                }
+            }
+        }else{
+            unSupportedArch(cpuArch)
+        }
+    }
+
+    fun unSupportedArch(cpuArch:String){
+        viewModel.OutPutInfo += "\nCannot start the miner core process..."
+        viewModel.OutPutInfo += "\nYour system is reporting an unsupported arch: $cpuArch"
+        viewModel.TriggerOutputUpdate.postValue(viewModel.OutPutInfo.length)
     }
 
     private fun SyncMiner() {

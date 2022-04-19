@@ -51,6 +51,8 @@ class SettingsFragment : Fragment(), View.OnClickListener {
         binding.settingsFragmentMinerID.value = viewModel.MinerID
         binding.settingsFragmentMode.setOnClickListener(this)
 
+        binding.settingsFragmentVersion.text = "v${requireContext().packageManager.getPackageInfo(requireContext().packageName, 0).versionName}"
+
         binding.settingsFragmentCpuSlider.addOnChangeListener { _, value, _ ->
             binding.settingsFragmentCpuNumber.text = value.toInt().toString()
         }
@@ -123,6 +125,7 @@ class SettingsFragment : Fragment(), View.OnClickListener {
                 viewModel.CPUtoUse.value = binding.settingsFragmentCpuSlider.value.toInt()
                 viewModel.MinerID = binding.settingsFragmentMinerID.value
                 viewModel.isSoloMining.value = !binding.settingsFragmentMode.isChecked
+                viewModel.poolString.value = binding.settingsFragmentPoolSource.text.toString()
 
                 if(viewModel.getMinerAddres().isNotEmpty() && viewModel.getMinerAddres().isNotBlank() && Nosocoreunit.IsValidAddress(viewModel.getMinerAddres())){
                     callback.onSaveSettings()
